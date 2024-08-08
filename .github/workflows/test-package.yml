@@ -31,8 +31,8 @@ jobs:
     - name: install dependencies
       run: go get -v -d ./...
     - name: run tests
-      run: go test ./...
+      run: go test $(go list ./... | grep -v /features/)
     - name: vet package
       # go1.12 vet shows spurious 'unknown identifier' issues
       if: matrix.go-version != '1.12'
-      run: go vet ./...
+      run: go vet $(go list ./... | grep -v /features/)

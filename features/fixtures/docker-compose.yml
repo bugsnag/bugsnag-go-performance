@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: ../../
+      dockerfile: ./features/fixtures/app/Dockerfile
+      args:
+       - GO_VERSION
+    environment:
+     - DEFAULT_MAZE_ADDRESS
+    restart: "no"
+    command: go run .
