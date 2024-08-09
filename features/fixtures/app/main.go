@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -23,7 +22,8 @@ func HandledScenario() (string, func()) {
 func main() {
 		fmt.Println("[Bugsnag] Starting testapp")
 		// Listening to the OS Signals
-		ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+		signalsChan := make(chan os.Signal, 1)
+		signal.Notify(signalsChan, syscall.SIGINT, syscall.SIGTERM)
 		ticker := time.NewTicker(1 * time.Second)
 
 		addr := os.Getenv("DEFAULT_MAZE_ADDRESS")
@@ -46,8 +46,8 @@ func main() {
 						scenarioFunc()
 					}
 				}
-			case <-ctx.Done():
-					fmt.Println("[Bugsnag] Context is done, closing")
+			case <-signalsChan:
+					fmt.Println("[Bugsnag] Signal received, closing")
 					ticker.Stop()
 					return
 			}

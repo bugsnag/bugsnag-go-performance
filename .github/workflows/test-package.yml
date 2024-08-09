@@ -36,3 +36,23 @@ jobs:
       # go1.12 vet shows spurious 'unknown identifier' issues
       if: matrix.go-version != '1.12'
       run: go vet $(go list ./... | grep -v /features/)
+
+    - name: install integration dependencies
+      if: matrix.os == 'ubuntu'
+      run: |
+        sudo apt-get update
+        sudo apt-get install libcurl4-openssl-dev
+
+    - name: install Ruby
+      if: matrix.os == 'ubuntu'
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+        working-directory: go/src/github.com/bugsnag/bugsnag-go-performance # relative to $GITHUB_WORKSPACE
+    - name: maze tests
+      working-directory: go/src/github.com/bugsnag/bugsnag-go-performance
+      if: matrix.os == 'ubuntu'
+      env:
+        GO_VERSION: ${{ matrix.go-version }}
+      run: DEBUG=1 bundle exec maze-runner --color --format progress
