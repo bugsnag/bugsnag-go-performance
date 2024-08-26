@@ -16,7 +16,7 @@ func resetEnv() {
 
 // Needs to be first to test sync.Once for loadEnv
 func TestConfigureTwiceEnv(t *testing.T) {
-	t.Cleanup(resetEnv)
+	resetEnv()
 
 	testConfig := Configuration{
 		APIKey:               "aaa",
@@ -52,7 +52,7 @@ func TestConfigureTwiceEnv(t *testing.T) {
 }
 
 func TestConfigureEmpty(t *testing.T) {
-	t.Cleanup(resetEnv)
+	resetEnv()
 
 	_, _, err := Configure(Configuration{})
 	if err == nil {
@@ -61,7 +61,7 @@ func TestConfigureEmpty(t *testing.T) {
 }
 
 func TestDefaultValues(t *testing.T) {
-	t.Cleanup(resetEnv)
+	resetEnv()
 
 	testConfig := Configuration{
 		APIKey:               "aaa",
@@ -82,7 +82,7 @@ func TestDefaultValues(t *testing.T) {
 }
 
 func TestConfigureOverwriteDefault(t *testing.T) {
-	t.Cleanup(resetEnv)
+	resetEnv()
 
 	testConfig := Configuration{
 		APIKey:               "bbb",
@@ -102,7 +102,7 @@ func TestConfigureOverwriteDefault(t *testing.T) {
 }
 
 func TestConfigureMixedSetup(t *testing.T) {
-	t.Cleanup(resetEnv)
+	resetEnv()
 
 	testConfig := Configuration{
 		APIKey:               "bbb",
@@ -129,7 +129,7 @@ func TestConfigureMixedSetup(t *testing.T) {
 }
 
 func TestConfigureTwice(t *testing.T) {
-	t.Cleanup(resetEnv)
+	resetEnv()
 
 	testConfig := Configuration{
 		APIKey:               "aaa",
@@ -165,7 +165,7 @@ func TestConfigureTwice(t *testing.T) {
 }
 
 func TestConfigureNotifierEnv(t *testing.T) {
-	t.Cleanup(resetEnv)
+	resetEnv()
 
 	testConfig := Configuration{
 		APIKey:               "aaa",
