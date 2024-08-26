@@ -5,6 +5,13 @@ services:
       dockerfile: ./features/fixtures/app/Dockerfile
       args:
        - GO_VERSION
+       - BUGSNAG_PERFORMANCE_API_KEY
+       - BUGSNAG_API_KEY
+       - BUGSNAG_APP_VERSION
+       - BUGSNAG_PERFORMANCE_RELEASE_STAGE
+       - BUGSNAG_RELEASE_STAGE
+       - BUGSNAG_PERFORMANCE_ENABLED_RELEASE_STAGES
+       - BUGSNAG_NOTIFY_RELEASE_STAGES
     environment:
      - DEFAULT_MAZE_ADDRESS
     restart: "no"

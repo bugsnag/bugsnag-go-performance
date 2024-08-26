@@ -56,12 +56,15 @@ func (config *Configuration) update(other *Configuration) *Configuration {
 }
 
 func (config *Configuration) validate() error {
-	if (config.APIKey == "") {
+	if config.APIKey == "" {
 		return fmt.Errorf("no Bugsnag API Key set")
 	}
 
-	defaultEndpoint := fmt.Sprintf("https://%+v.otlp.bugsnag.com/v1/traces", config.APIKey)
-	config.Endpoint = defaultEndpoint
+	if config.Endpoint == "" {
+		defaultEndpoint := fmt.Sprintf("https://%+v.otlp.bugsnag.com/v1/traces", config.APIKey)
+		config.Endpoint = defaultEndpoint
+	}
+
 	return nil
 }
 
