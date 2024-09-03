@@ -26,6 +26,6 @@ WORKDIR /app/src/github.com/bugsnag/bugsnag-go-performance/features/fixtures/app
 # Skip on old versions of Go which pre-date modules
 RUN if [[ $GO_VERSION != '1.11' && $GO_VERSION != '1.12' ]]; then \
         go mod init && go mod tidy; \
-        #echo "replace github.com/bugsnag/bugsnag-go-performance => ../../../" >> go.mod; \
+        echo "replace github.com/bugsnag/bugsnag-go-performance => ../../../" >> go.mod; \
         go mod tidy; \
     fi

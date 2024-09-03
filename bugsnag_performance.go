@@ -3,6 +3,8 @@ package bugsnagperformance
 import (
 	"fmt"
 	"sync"
+
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 // Version defines the version of this Bugsnag performance module
@@ -23,8 +25,7 @@ func init() {
 // Configure Bugsnag. The only required setting is the APIKey, which can be
 // obtained by clicking on "Settings" in your Bugsnag dashboard.
 // Returns OTeL sampler, trace exporter and error
-func Configure(config Configuration) (interface{}, interface{}, error) {
-
+func Configure(config Configuration) (trace.Sampler, trace.SpanProcessor, error) {
 	readEnvConfigOnce.Do(Config.loadEnv)
 	Config.update(&config)
 	err := Config.validate()
@@ -32,5 +33,9 @@ func Configure(config Configuration) (interface{}, interface{}, error) {
 		return nil, nil, err
 	}
 
-	return nil, nil, nil
+	spanExporter := CreateSpanExporter()
+	// Batch processor with default settings
+	bsgSpanProcessor := trace.NewBatchSpanProcessor(spanExporter)
+
+	return nil, bsgSpanProcessor, nil
 }
