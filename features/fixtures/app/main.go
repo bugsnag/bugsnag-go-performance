@@ -13,7 +13,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
 var scenariosMap = map[string]func() (string, func()){
@@ -43,7 +43,7 @@ func configureOtel(addr string) {
 		Endpoint: fmt.Sprintf("%v/traces", addr),
 	})
 	if err != nil {
-		fmt.Printf("Error while creating bugsnag-go-performance: %+v", err)
+		fmt.Printf("Error while creating bugsnag-go-performance: %+v\n", err)
 		return
 	}
 
@@ -61,7 +61,7 @@ func configureOtel(addr string) {
 		semconv.DeploymentEnvironment("production"),
 	))
 	if err != nil {
-		fmt.Printf("Error while creating resource: %+v", err)
+		fmt.Printf("Error while creating resource: %+v\n", err)
 	}
 	fmt.Printf("Resource: %+v\n", traceRes)
 	otelOptions = append(otelOptions, trace.WithResource(traceRes))
