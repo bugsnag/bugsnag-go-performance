@@ -130,7 +130,7 @@ func (enc *payloadEncoder) attributesToSlice(attr []attribute.KeyValue) []map[st
 func (enc *payloadEncoder) attributeToMap(kv attribute.KeyValue) map[string]interface{} {
 	singleAttr := map[string]interface{}{}
 
-	singleAttr["key"] = kv.Key
+	singleAttr["key"] = string(kv.Key)
 	singleAttr["value"] = enc.attributeValueToMap(kv.Value)
 
 	return singleAttr
@@ -194,12 +194,20 @@ func (enc *payloadEncoder) linksToSlice(links []trace.Link) []map[string]interfa
 	encodedLinks := []map[string]interface{}{}
 
 	for _, link := range links {
-		encodedLinks = append(encodedLinks, map[string]interface{}{
-			"traceId":    link.SpanContext.TraceID().String(),
-			"spanId":     link.SpanContext.SpanID().String(),
-			"traceState": link.SpanContext.TraceState().String(),
+		encodedLink := map[string]interface{}{
 			"attributes": enc.attributesToSlice(link.Attributes),
-		})
+		}
+		if link.SpanContext.HasTraceID() {
+			encodedLink["traceId"] = link.SpanContext.TraceID().String()
+		}
+		if link.SpanContext.HasSpanID() {
+			encodedLink["spanId"] = link.SpanContext.SpanID().String()
+		}
+		if traceState := link.SpanContext.TraceState(); traceState.String() != "" {
+			encodedLink["traceState"] = traceState.String()
+		}
+
+		encodedLinks = append(encodedLinks, encodedLink)
 	}
 
 	return encodedLinks

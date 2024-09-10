@@ -49,9 +49,11 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 		if samplingHeader == "" {
 			fmt.Println("One or more spans are missing the 'bugsnag.sampling.p' attribute. This trace will be sent as unmanaged")
 			managedStatus = "unmanaged"
-		} else {
-			headers["Bugsnag-Span-Sampling"] = samplingHeader
 		}
+		// TODO - sampling header hardcoded in delivery for now
+		//  else {
+		// 	headers["Bugsnag-Span-Sampling"] = samplingHeader
+		// }
 	}
 
 	if !sp.loggedFirstBatchDestination {
