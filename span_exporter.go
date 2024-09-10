@@ -55,7 +55,7 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	}
 
 	if !sp.loggedFirstBatchDestination {
-		fmt.Printf("Sending %+v spans to %+v\n", managedStatus, "url")
+		fmt.Printf("Sending %+v spans to %+v\n", managedStatus, sp.delivery.uri)
 		sp.loggedFirstBatchDestination = true
 	}
 

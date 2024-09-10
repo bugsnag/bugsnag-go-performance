@@ -1,7 +1,6 @@
 package bugsnagperformance
 
 import (
-	"fmt"
 	"strconv"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -13,30 +12,69 @@ type payloadEncoder struct {
 
 func (enc *payloadEncoder) encode(spans []trace.ReadOnlySpan) map[string]interface{} {
 	encodedResult := map[string]interface{}{}
+	encodedResourceSpans := []interface{}{}
+	encodedScopeSpans := []interface{}{}
 
-	spansArray := []map[string]interface{}{}
-	for _, span := range spans {
-		spansArray = append(spansArray, enc.spanToMap(span))
-	}
+	spansByResource := enc.sortSpansByResource(spans)
+	for _, resourceSpans := range spansByResource {
+		if len(resourceSpans) == 0 {
+			continue
+		}
 
-	fmt.Printf("Resource attributes\n")
-	encodedResult["resourceSpans"] = []interface{}{map[string]interface{}{
-		"resource": map[string]interface{}{
-			"attributes": enc.attributesToSlice(spans[0].Resource().Attributes()),
-		},
-		"scopeSpans": []interface{}{
-			map[string]interface{}{
+		spansByScope := enc.sortSpansByScope(resourceSpans)
+		for _, scopeSpansArr := range spansByScope {
+			if len(scopeSpansArr) == 0 {
+				continue
+			}
+			encodedScopeSpansArr := []map[string]interface{}{}
+			for _, scopedSpan := range scopeSpansArr {
+				encodedScopeSpansArr = append(encodedScopeSpansArr, enc.spanToMap(scopedSpan))
+			}
+
+			encodedScopeSpans = append(encodedScopeSpans, map[string]interface{}{
 				"scope": map[string]interface{}{
-					"name":    spans[0].InstrumentationScope().Name,
-					"version": spans[0].InstrumentationScope().Version,
+					"name":    scopeSpansArr[0].InstrumentationScope().Name,
+					"version": scopeSpansArr[0].InstrumentationScope().Version,
 				},
-				"spans": spansArray,
+				"spans": encodedScopeSpansArr,
+			})
+		}
+
+		encodedResourceSpans = append(encodedResourceSpans, map[string]interface{}{
+			"resource": map[string]interface{}{
+				"attributes": enc.attributesToSlice(resourceSpans[0].Resource().Attributes()),
 			},
-		},
-	},
+			"scopeSpans": encodedScopeSpans,
+		})
 	}
+
+	encodedResult["resourceSpans"] = encodedResourceSpans
 
 	return encodedResult
+}
+
+func (enc *payloadEncoder) sortSpansByResource(spans []trace.ReadOnlySpan)  map[attribute.Distinct][]trace.ReadOnlySpan {
+	spansByResource := map[attribute.Distinct][]trace.ReadOnlySpan{}
+	for _, span := range spans {
+		mapKey := span.Resource().Equivalent()
+		if spansByResource[mapKey] == nil {
+			spansByResource[mapKey] = []trace.ReadOnlySpan{}
+		}
+		spansByResource[mapKey] = append(spansByResource[mapKey], span)
+	}
+	return spansByResource
+}
+
+func (enc *payloadEncoder) sortSpansByScope(spans []trace.ReadOnlySpan) map[string][]trace.ReadOnlySpan {
+	spansByScope := map[string][]trace.ReadOnlySpan{}
+	for _, span := range spans {
+		mapKey := span.InstrumentationScope().Name
+		if spansByScope[mapKey] == nil {
+			spansByScope[mapKey] = []trace.ReadOnlySpan{}
+		}
+		spansByScope[mapKey] = append(spansByScope[mapKey], span)
+	}
+	return spansByScope
 }
 
 func (enc *payloadEncoder) spanToMap(span trace.ReadOnlySpan) map[string]interface{} {
@@ -46,7 +84,6 @@ func (enc *payloadEncoder) spanToMap(span trace.ReadOnlySpan) map[string]interfa
 		"kind":                   int(span.SpanKind()),
 		"startTimeUnixNano":      strconv.FormatInt(span.StartTime().UnixNano(), 10),
 		"endTimeUnixNano":        strconv.FormatInt(span.EndTime().UnixNano(), 10),
-		"traceState":             "",
 		"droppedAttributesCount": span.DroppedAttributes(),
 		"droppedEventsCount":     span.DroppedEvents(),
 		"droppedLinksCount":      span.DroppedLinks(),
@@ -65,8 +102,10 @@ func (enc *payloadEncoder) spanToMap(span trace.ReadOnlySpan) map[string]interfa
 	if span.SpanContext().HasSpanID() {
 		encodedSpan["spanId"] = span.SpanContext().SpanID().String()
 	}
+	if traceState := span.Parent().TraceState().String(); traceState != "" {
+		encodedSpan["traceState"] = traceState
+	}
 
-	fmt.Printf("Span attributes\n")
 	attr := enc.attributesToSlice(span.Attributes())
 	encodedSpan["attributes"] = attr
 
@@ -85,9 +124,6 @@ func (enc *payloadEncoder) attributesToSlice(attr []attribute.KeyValue) []map[st
 	for _, keyVal := range attr {
 		encodedAttr = append(encodedAttr, enc.attributeToMap(keyVal))
 	}
-
-	fmt.Printf("ATTRIBUTES: %+v\n", encodedAttr)
-
 	return encodedAttr
 }
 
@@ -143,7 +179,6 @@ func (enc *payloadEncoder) attributeValueToMap(val attribute.Value) map[string]i
 func (enc *payloadEncoder) eventsToSlice(events []trace.Event) []map[string]interface{} {
 	encodedEvents := []map[string]interface{}{}
 
-	fmt.Printf("Event attributes\n")
 	for _, event := range events {
 		encodedEvents = append(encodedEvents, map[string]interface{}{
 			"name":         event.Name,
@@ -158,7 +193,6 @@ func (enc *payloadEncoder) eventsToSlice(events []trace.Event) []map[string]inte
 func (enc *payloadEncoder) linksToSlice(links []trace.Link) []map[string]interface{} {
 	encodedLinks := []map[string]interface{}{}
 
-	fmt.Printf("Link attributes\n")
 	for _, link := range links {
 		encodedLinks = append(encodedLinks, map[string]interface{}{
 			"traceId":    link.SpanContext.TraceID().String(),

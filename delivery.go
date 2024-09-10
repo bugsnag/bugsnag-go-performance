@@ -14,7 +14,7 @@ type delivery struct {
 
 func (d *delivery) sendPayload(payload []byte) error {
 	client := http.Client{
-		Timeout: 1 * time.Second,
+		Timeout: 10 * time.Second,
 	}
 
 	body := bytes.NewBuffer(payload)

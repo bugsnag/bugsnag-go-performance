@@ -28,7 +28,7 @@ func HandledScenario() (string, func()) {
 		// TODO - hardcoded sampling attribute
 		span.SetAttributes(attribute.KeyValue{
 			Key: "bugsnag.sampling.p",
-			Value: attribute.StringValue("1.0"),
+			Value: attribute.Float64Value(1.0),
 		})
 		span.End()
 	}
@@ -63,7 +63,6 @@ func configureOtel(addr string) {
 	if err != nil {
 		fmt.Printf("Error while creating resource: %+v\n", err)
 	}
-	fmt.Printf("Resource: %+v\n", traceRes)
 	otelOptions = append(otelOptions, trace.WithResource(traceRes))
 
 	tracerProvider := trace.NewTracerProvider(otelOptions...)
