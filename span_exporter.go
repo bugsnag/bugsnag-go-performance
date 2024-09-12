@@ -14,8 +14,8 @@ type SpanExporter struct {
 	loggedFirstBatchDestination bool
 	probabilityManager interface{}
 	delivery *delivery
-	samplingHeaderEncoder
-	payloadEncoder
+	sampleHeaderEnc *samplingHeaderEncoder
+	paylodEnc *payloadEncoder
 }
 
 func CreateSpanExporter() trace.SpanExporter {
@@ -44,7 +44,7 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	headers := map[string]string{}
 	if !sp.unmanagedMode {
 
-		samplingHeader := sp.samplingHeaderEncoder.encode(spans)
+		samplingHeader := sp.sampleHeaderEnc.encode(spans)
 
 		if samplingHeader == "" {
 			fmt.Println("One or more spans are missing the 'bugsnag.sampling.p' attribute. This trace will be sent as unmanaged")
@@ -62,7 +62,7 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	}
 
 	// encode to JSON
-	encodedPayload := sp.payloadEncoder.encode(spans)
+	encodedPayload := sp.paylodEnc.encode(spans)
 	payload, err := json.Marshal(encodedPayload)
 	if err != nil {
 		fmt.Printf("Error encoding spans: %v\n", err)

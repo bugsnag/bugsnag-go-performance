@@ -33,9 +33,11 @@ func Configure(config Configuration) (trace.Sampler, trace.SpanProcessor, error)
 		return nil, nil, err
 	}
 
+	probabilityManager := CreateProbabilityManager()
+	sampler := CreateSampler(probabilityManager)
 	spanExporter := CreateSpanExporter()
 	// Batch processor with default settings
 	bsgSpanProcessor := trace.NewBatchSpanProcessor(spanExporter)
 
-	return nil, bsgSpanProcessor, nil
+	return sampler, bsgSpanProcessor, nil
 }
