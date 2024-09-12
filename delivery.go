@@ -4,15 +4,51 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
+
+const SAMPLING_PROBABILITY_HEADER = "Bugsnag-Sampling-Probability"
+const SPAN_SAMPLING_HEADER = "Bugsnag-Span-Sampling"
+
+type response struct {
+	statusCode int
+	samplingProbablity *float64
+}
+
+func newParsedResponse(rawResponse http.Response) response {
+	probability := parseSamplingProbability(rawResponse)
+
+	return response{
+		statusCode: rawResponse.StatusCode,
+		samplingProbablity: probability,
+	}
+}
+
+func parseSamplingProbability(rawResponse http.Response) *float64 {
+	var probability *float64
+
+	probabilityHeader := rawResponse.Header.Get(SAMPLING_PROBABILITY_HEADER)
+	if probabilityHeader != "" {
+		value, err := strconv.ParseFloat(probabilityHeader, 64)
+		if err != nil {
+			if value <= 1.0 && value >= 0.0 {
+				probability = &value
+			} else {
+				fmt.Printf("Invalid sampling probability: %v\n", value)
+			}
+		}
+	}
+
+	return probability
+}
 
 type delivery struct {
 	uri     string
 	headers map[string]string
 }
 
-func (d *delivery) sendPayload(payload []byte) error {
+func (d *delivery) sendPayload(payload []byte) (*http.Response, error) {
 	client := http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -20,27 +56,25 @@ func (d *delivery) sendPayload(payload []byte) error {
 	body := bytes.NewBuffer(payload)
 	req, err := http.NewRequest("POST", d.uri, body)
 	if err != nil {
-		return fmt.Errorf("error creating request: %v", err)
+		return nil, fmt.Errorf("error creating request: %v", err)
 	}
 
 	for key, val := range d.headers {
 		req.Header.Set(key, val)
 	}
 
-	_, err = client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error sending payload: %v", err)
+		return nil, fmt.Errorf("error sending payload: %v", err)
 	}
 
-	return nil
+	return resp, nil
 }
 
 func createDelivery(uri, apiKey string) *delivery {
-	// TODO - sampling header hardcoded
 	headers := map[string]string{
 		"Bugsnag-Api-Key":       apiKey,
 		"Content-Type":          "application/json",
-		"Bugsnag-Span-Sampling": "1.0:0",
 	}
 
 	return &delivery{
@@ -49,15 +83,15 @@ func createDelivery(uri, apiKey string) *delivery {
 	}
 }
 
-func (d *delivery) send(headers map[string]string, payload []byte) error {
+func (d *delivery) send(headers map[string]string, payload []byte) (*http.Response, error) {
 	d.headers["Bugsnag-Sent-At"] = time.Now().Format(time.RFC3339)
 	for k, v := range headers {
 		d.headers[k] = v
 	}
 
-	err := d.sendPayload(payload)
+	resp, err := d.sendPayload(payload)
 	if err != nil {
-		return fmt.Errorf("error sending payload: %v", err)
+		return nil, fmt.Errorf("error sending payload: %v", err)
 	}
-	return nil
+	return resp, nil
 }

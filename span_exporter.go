@@ -9,23 +9,23 @@ import (
 )
 
 type SpanExporter struct {
-	disabled       bool
-	unmanagedMode bool
+	disabled                    bool
+	unmanagedMode               bool
 	loggedFirstBatchDestination bool
-	probabilityManager interface{}
-	delivery *delivery
-	sampleHeaderEnc *samplingHeaderEncoder
-	paylodEnc *payloadEncoder
+	probabilityManager          *probabilityManager
+	delivery                    *delivery
+	sampleHeaderEnc             *samplingHeaderEncoder
+	paylodEnc                   *payloadEncoder
 }
 
-func CreateSpanExporter() trace.SpanExporter {
+func CreateSpanExporter(probMgr *probabilityManager) trace.SpanExporter {
 	delivery := createDelivery(Config.Endpoint, Config.APIKey)
 
 	sp := SpanExporter{
-		disabled: false,
+		disabled:                    false,
 		loggedFirstBatchDestination: false,
-		probabilityManager: nil,
-		delivery: delivery,
+		probabilityManager:          probMgr,
+		delivery:                    delivery,
 	}
 
 	return &sp
@@ -35,11 +35,11 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	if sp.disabled {
 		return nil
 	}
-	
-	 managedStatus := "managed"
-	 if sp.unmanagedMode {
+
+	managedStatus := "managed"
+	if sp.unmanagedMode {
 		managedStatus = "unmanaged"
-	 }
+	}
 
 	headers := map[string]string{}
 	if !sp.unmanagedMode {
@@ -49,11 +49,9 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 		if samplingHeader == "" {
 			fmt.Println("One or more spans are missing the 'bugsnag.sampling.p' attribute. This trace will be sent as unmanaged")
 			managedStatus = "unmanaged"
+		} else {
+			headers[SPAN_SAMPLING_HEADER] = samplingHeader
 		}
-		// TODO - sampling header hardcoded in delivery for now
-		//  else {
-		// 	headers["Bugsnag-Span-Sampling"] = samplingHeader
-		// }
 	}
 
 	if !sp.loggedFirstBatchDestination {
@@ -69,9 +67,18 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	}
 
 	// send payload
-	sp.delivery.send(headers, payload)
+	resp, err := sp.delivery.send(headers, payload)
+	if err != nil {
+		fmt.Printf("Error sending payload: %v\n", err)
+	}
 
 	// update sampling probability in ProbabilityManager
+	if resp != nil {
+		parsedResp := newParsedResponse(*resp)
+		if parsedResp.samplingProbablity != nil {
+			sp.probabilityManager.setProbability(*parsedResp.samplingProbablity)
+		}
+	}
 
 	return nil
 }

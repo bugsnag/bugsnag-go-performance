@@ -2,6 +2,7 @@ package bugsnagperformance
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -20,8 +21,8 @@ func (enc *samplingHeaderEncoder) encode(spans []trace.ReadOnlySpan) string {
 		found := false
 		for _, keyVal := range attributes {
 			if keyVal.Key == "bugsnag.sampling.p" {
-				value := keyVal.Value.AsString()
-				mappedValues[value] += 1
+				value := keyVal.Value.AsFloat64()
+				mappedValues[strconv.FormatFloat(value, 'g', -1, 64)] += 1
 				found = true
 				break
 			}
