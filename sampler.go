@@ -17,13 +17,12 @@ const (
 
 type Sampler struct {
 	probMgr *probabilityManager
-	parser  *tracestateParser
+	parser  tracestateParser
 }
 
-func CreateSampler(probManager *probabilityManager) sdktrace.Sampler {
+func CreateSampler(probManager *probabilityManager) *Sampler {
 	sampler := Sampler{
 		probMgr: probManager,
-		parser:  &tracestateParser{},
 	}
 
 	return &sampler
@@ -52,33 +51,28 @@ func (s *Sampler) ShouldSample(parameters sdktrace.SamplingParameters) sdktrace.
 	}
 }
 
-func (s *Sampler) resample(span sdktrace.ReadOnlySpan) bool {
+func (s *Sampler) resample(span sdktrace.ReadOnlySpan) (wrappedSpan, bool) {
+	wrappedSpan := wrappedSpan{roSpan: span}
 	attributes := attribute.NewSet(span.Attributes()...)
 
 	// sample all spans that are missing the p value attribute
 	if attributes.Len() == 0 || !attributes.HasValue("bugsnag.sampling.p") {
-		return true
+		return wrappedSpan, true
 	}
 
 	probability := s.probMgr.getProbability()
 	value, _ := attributes.Value("bugsnag.sampling.p")
 	value64 := value.AsFloat64()
 	if value64 > probability {
-		// TODO update the p value attribute
-		// but the span is readonly...
-
 		value64 = probability
+		wrappedSpan.probAttr = &value64
 	}
 
-	return s.sampleUsingProbabilityAndTrace(value64, span.SpanContext().TraceState(), span.SpanContext().TraceID())
+	return wrappedSpan, s.sampleUsingProbabilityAndTrace(value64, span.SpanContext().TraceState(), span.SpanContext().TraceID())
 }
 
 func (s *Sampler) sampleUsingProbabilityAndTrace(probability float64, traceState trace.TraceState, traceID trace.TraceID) bool {
-	parsedState, err := s.parser.parse(traceState)
-	if err != nil {
-		fmt.Printf("Error parsing tracestate: %v\n", err)
-		return true
-	}
+	parsedState := s.parser.parse(traceState)
 
 	if parsedState.isValid() {
 		if parsedState.isValue32() {
@@ -92,7 +86,7 @@ func (s *Sampler) sampleUsingProbabilityAndTrace(probability float64, traceState
 		}
 	} else {
 		var rValue uint64
-		err = binary.Read(bytes.NewBuffer(traceID[:]), binary.LittleEndian, &rValue)
+		err := binary.Read(bytes.NewBuffer(traceID[:]), binary.BigEndian, &rValue)
 		if err != nil {
 			fmt.Printf("Error parsing trace ID: %v\n", err)
 			return true

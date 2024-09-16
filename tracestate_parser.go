@@ -1,7 +1,6 @@
 package bugsnagperformance
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -32,12 +31,12 @@ func (pts parsedTracestate) getRValue64() uint64 {
 
 type tracestateParser struct{}
 
-func (tsp *tracestateParser) parse(tracestate trace.TraceState) (parsedTracestate, error) {
+func (tsp tracestateParser) parse(tracestate trace.TraceState) parsedTracestate {
 	state := parsedTracestate{}
 
 	sbValues := tracestate.Get("sb")
 	if sbValues == "" {
-		return state, fmt.Errorf("tracestate does not contain 'sb' key")
+		return state
 	}
 
 	sbParts := strings.Split(sbValues, ";")
@@ -60,5 +59,5 @@ func (tsp *tracestateParser) parse(tracestate trace.TraceState) (parsedTracestat
 		}
 	}
 
-	return state, nil
+	return state
 }

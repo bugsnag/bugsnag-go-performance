@@ -2,42 +2,57 @@ package bugsnagperformance
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
-
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-type samplingHeaderEncoder struct {}
+type samplingHeaderEncoder struct{}
 
-func (enc *samplingHeaderEncoder) encode(spans []trace.ReadOnlySpan) string {
+func (enc samplingHeaderEncoder) encode(spans []wrappedSpan) string {
 	if len(spans) == 0 {
 		return "1.0:0"
 	}
 
-	mappedValues := map[string]int{}
+	mappedValues := map[float64]int{}
 	for _, span := range spans {
-		attributes := span.Attributes()
+		attributes := span.roSpan.Attributes()
 		found := false
 		for _, keyVal := range attributes {
 			if keyVal.Key == "bugsnag.sampling.p" {
-				value := keyVal.Value.AsFloat64()
-				mappedValues[strconv.FormatFloat(value, 'g', -1, 64)] += 1
-				found = true
-				break
+				// was resampled
+				if span.probAttr != nil {
+					mappedValues[*span.probAttr] += 1
+					found = true
+				} else {
+					mappedValues[keyVal.Value.AsFloat64()] += 1
+					found = true
+					break
+				}
 			}
 		}
 
 		if !found {
 			// Bail if the atrribute is missing; we'll warn about this later as it
-      // means something has gone wrong
+			// means something has gone wrong
 			return ""
 		}
 	}
 
+	// Sort the keys so the result is deterministic
+	keysSlice := []float64{}
+	for key := range mappedValues {
+		keysSlice = append(keysSlice, key)
+	}
+	sort.Float64s(keysSlice)
+
 	valuesSlice := []string{}
-	for key, val := range mappedValues {
-		valuesSlice = append(valuesSlice, fmt.Sprintf("%+v:%+v", key, val))
+	for _, key := range keysSlice {
+		keyStr := strconv.FormatFloat(key, 'g', -1, 64)
+		if keyStr == "1" {
+			keyStr = "1.0"
+		}
+		valuesSlice = append(valuesSlice, fmt.Sprintf("%+v:%+v", keyStr, mappedValues[key]))
 	}
 
 	return strings.Join(valuesSlice[:], ";")
