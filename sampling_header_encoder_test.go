@@ -19,11 +19,11 @@ func makeSpan(tp *trace.TracerProvider, name string, probability ...float64) {
 	span.End()
 }
 
-func getSpans(exporter *tracetest.InMemoryExporter) []wrappedSpan {
+func getSpans(exporter *tracetest.InMemoryExporter) []managedSpan {
 	spans := exporter.GetSpans().Snapshots()
-	wrappedSpans := []wrappedSpan{}
+	wrappedSpans := []managedSpan{}
 	for _, span := range spans {
-		wrappedSpans = append(wrappedSpans, wrappedSpan{roSpan: span})
+		wrappedSpans = append(wrappedSpans, managedSpan{span: span})
 	}
 	return wrappedSpans
 }
@@ -31,7 +31,7 @@ func getSpans(exporter *tracetest.InMemoryExporter) []wrappedSpan {
 func TestDefaultHeaderValue(t *testing.T) {
 	enc := &samplingHeaderEncoder{}
 
-	result := enc.encode([]wrappedSpan{})
+	result := enc.encode([]managedSpan{})
 	if result != "1.0:0" {
 		t.Errorf("Expected '1.0:0', got %s", result)
 	}
@@ -112,7 +112,7 @@ func TestResampled(t *testing.T) {
 
 	spans := getSpans(testExporter)
 	newProbability := 0.2
-	spans[0].probAttr = &newProbability
+	spans[0].samplingProbability = &newProbability
 
 	result := enc.encode(spans)
 	if result != "0.1:1;0.2:2" {

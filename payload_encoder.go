@@ -10,7 +10,7 @@ import (
 type payloadEncoder struct {
 }
 
-func (enc payloadEncoder) encode(spans []wrappedSpan) map[string]interface{} {
+func (enc payloadEncoder) encode(spans []managedSpan) map[string]interface{} {
 	encodedResult := map[string]interface{}{}
 	encodedResourceSpans := []interface{}{}
 	encodedScopeSpans := []interface{}{}
@@ -33,8 +33,8 @@ func (enc payloadEncoder) encode(spans []wrappedSpan) map[string]interface{} {
 
 			encodedScopeSpans = append(encodedScopeSpans, map[string]interface{}{
 				"scope": map[string]interface{}{
-					"name":    scopeSpansArr[0].roSpan.InstrumentationScope().Name,
-					"version": scopeSpansArr[0].roSpan.InstrumentationScope().Version,
+					"name":    scopeSpansArr[0].span.InstrumentationScope().Name,
+					"version": scopeSpansArr[0].span.InstrumentationScope().Version,
 				},
 				"spans": encodedScopeSpansArr,
 			})
@@ -42,7 +42,7 @@ func (enc payloadEncoder) encode(spans []wrappedSpan) map[string]interface{} {
 
 		encodedResourceSpans = append(encodedResourceSpans, map[string]interface{}{
 			"resource": map[string]interface{}{
-				"attributes": enc.attributesToSlice(resourceSpans[0].roSpan.Resource().Attributes()),
+				"attributes": enc.attributesToSlice(resourceSpans[0].span.Resource().Attributes()),
 			},
 			"scopeSpans": encodedScopeSpans,
 		})
@@ -53,85 +53,86 @@ func (enc payloadEncoder) encode(spans []wrappedSpan) map[string]interface{} {
 	return encodedResult
 }
 
-func (enc payloadEncoder) sortSpansByResource(spans []wrappedSpan) map[attribute.Distinct][]wrappedSpan {
-	spansByResource := map[attribute.Distinct][]wrappedSpan{}
+func (enc payloadEncoder) sortSpansByResource(spans []managedSpan) map[attribute.Distinct][]managedSpan {
+	spansByResource := map[attribute.Distinct][]managedSpan{}
 	for _, span := range spans {
-		mapKey := span.roSpan.Resource().Equivalent()
+		mapKey := span.span.Resource().Equivalent()
 		if spansByResource[mapKey] == nil {
-			spansByResource[mapKey] = []wrappedSpan{}
+			spansByResource[mapKey] = []managedSpan{}
 		}
 		spansByResource[mapKey] = append(spansByResource[mapKey], span)
 	}
 	return spansByResource
 }
 
-func (enc payloadEncoder) sortSpansByScope(spans []wrappedSpan) map[string][]wrappedSpan {
-	spansByScope := map[string][]wrappedSpan{}
+func (enc payloadEncoder) sortSpansByScope(spans []managedSpan) map[string][]managedSpan {
+	spansByScope := map[string][]managedSpan{}
 	for _, span := range spans {
-		mapKey := span.roSpan.InstrumentationScope().Name
+		mapKey := span.span.InstrumentationScope().Name
 		if spansByScope[mapKey] == nil {
-			spansByScope[mapKey] = []wrappedSpan{}
+			spansByScope[mapKey] = []managedSpan{}
 		}
 		spansByScope[mapKey] = append(spansByScope[mapKey], span)
 	}
 	return spansByScope
 }
 
-func (enc payloadEncoder) spanToMap(span wrappedSpan) map[string]interface{} {
+func (enc payloadEncoder) spanToMap(span managedSpan) map[string]interface{} {
 
 	encodedSpan := map[string]interface{}{
-		"name":                   span.roSpan.Name(),
-		"kind":                   int(span.roSpan.SpanKind()),
-		"startTimeUnixNano":      strconv.FormatInt(span.roSpan.StartTime().UnixNano(), 10),
-		"endTimeUnixNano":        strconv.FormatInt(span.roSpan.EndTime().UnixNano(), 10),
-		"droppedAttributesCount": span.roSpan.DroppedAttributes(),
-		"droppedEventsCount":     span.roSpan.DroppedEvents(),
-		"droppedLinksCount":      span.roSpan.DroppedLinks(),
+		"name":                   span.span.Name(),
+		"kind":                   int(span.span.SpanKind()),
+		"startTimeUnixNano":      strconv.FormatInt(span.span.StartTime().UnixNano(), 10),
+		"endTimeUnixNano":        strconv.FormatInt(span.span.EndTime().UnixNano(), 10),
+		"droppedAttributesCount": span.span.DroppedAttributes(),
+		"droppedEventsCount":     span.span.DroppedEvents(),
+		"droppedLinksCount":      span.span.DroppedLinks(),
 		"status": map[string]interface{}{
-			"code":    span.roSpan.Status().Code,
-			"message": span.roSpan.Status().Description,
+			"code":    span.span.Status().Code,
+			"message": span.span.Status().Description,
 		},
 	}
 
-	if span.roSpan.Parent().SpanID().IsValid() {
-		encodedSpan["parentSpanId"] = span.roSpan.Parent().SpanID().String()
+	if span.span.Parent().SpanID().IsValid() {
+		encodedSpan["parentSpanId"] = span.span.Parent().SpanID().String()
 	}
-	if span.roSpan.SpanContext().HasTraceID() {
-		encodedSpan["traceId"] = span.roSpan.SpanContext().TraceID().String()
+	if span.span.SpanContext().HasTraceID() {
+		encodedSpan["traceId"] = span.span.SpanContext().TraceID().String()
 	}
-	if span.roSpan.SpanContext().HasSpanID() {
-		encodedSpan["spanId"] = span.roSpan.SpanContext().SpanID().String()
+	if span.span.SpanContext().HasSpanID() {
+		encodedSpan["spanId"] = span.span.SpanContext().SpanID().String()
 	}
-	if traceState := span.roSpan.Parent().TraceState().String(); traceState != "" {
+	if traceState := span.span.Parent().TraceState().String(); traceState != "" {
 		encodedSpan["traceState"] = traceState
 	}
 
-	attr := enc.attributesToSlice(span.roSpan.Attributes())
+	attr := enc.attributesToSlice(span.span.Attributes())
 	// was resampled
-	if span.probAttr != nil {
+	if span.samplingProbability != nil {
 		// update bugsnag.sampling.p attribute
 		found := false
 		for _, singleAttr := range attr {
 			if singleAttr["key"] == "bugsnag.sampling.p" {
 				found = true
-				singleAttr["value"] = map[string]interface{}{"doubleValue": *span.probAttr}
+				singleAttr["value"] = map[string]interface{}{"doubleValue": *span.samplingProbability}
+				break
 			}
 		}
 		if !found {
 			attr = append(attr, map[string]interface{}{
 				"key": "bugsnag.sampling.p",
 				"value": map[string]interface{}{
-					"doubleValue": *span.probAttr,
+					"doubleValue": *span.samplingProbability,
 				},
 			})
 		}
 	}
 	encodedSpan["attributes"] = attr
 
-	events := enc.eventsToSlice(span.roSpan.Events())
+	events := enc.eventsToSlice(span.span.Events())
 	encodedSpan["events"] = events
 
-	links := enc.linksToSlice(span.roSpan.Links())
+	links := enc.linksToSlice(span.span.Links())
 	encodedSpan["links"] = links
 
 	return encodedSpan

@@ -51,13 +51,13 @@ func (s *Sampler) ShouldSample(parameters sdktrace.SamplingParameters) sdktrace.
 	}
 }
 
-func (s *Sampler) resample(span sdktrace.ReadOnlySpan) (wrappedSpan, bool) {
-	wrappedSpan := wrappedSpan{roSpan: span}
+func (s *Sampler) resample(span sdktrace.ReadOnlySpan) (managedSpan, bool) {
+	managedSpan := managedSpan{span: span}
 	attributes := attribute.NewSet(span.Attributes()...)
 
 	// sample all spans that are missing the p value attribute
 	if attributes.Len() == 0 || !attributes.HasValue("bugsnag.sampling.p") {
-		return wrappedSpan, true
+		return managedSpan, true
 	}
 
 	probability := s.probMgr.getProbability()
@@ -65,10 +65,10 @@ func (s *Sampler) resample(span sdktrace.ReadOnlySpan) (wrappedSpan, bool) {
 	value64 := value.AsFloat64()
 	if value64 > probability {
 		value64 = probability
-		wrappedSpan.probAttr = &value64
+		managedSpan.samplingProbability = &value64
 	}
 
-	return wrappedSpan, s.sampleUsingProbabilityAndTrace(value64, span.SpanContext().TraceState(), span.SpanContext().TraceID())
+	return managedSpan, s.sampleUsingProbabilityAndTrace(value64, span.SpanContext().TraceState(), span.SpanContext().TraceID())
 }
 
 func (s *Sampler) sampleUsingProbabilityAndTrace(probability float64, traceState trace.TraceState, traceID trace.TraceID) bool {

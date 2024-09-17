@@ -19,9 +19,9 @@ type SpanExporter struct {
 	paylodEnc                   payloadEncoder
 }
 
-type wrappedSpan struct {
-	probAttr *float64
-	roSpan   trace.ReadOnlySpan
+type managedSpan struct {
+	samplingProbability *float64
+	span                trace.ReadOnlySpan
 }
 
 func CreateSpanExporter(probMgr *probabilityManager, sampler *Sampler) trace.SpanExporter {
@@ -47,15 +47,15 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 		managedStatus = "unmanaged"
 	}
 
-	filteredSpans := []wrappedSpan{}
+	filteredSpans := []managedSpan{}
 	headers := map[string]string{}
 	if !sp.unmanagedMode {
 		// resample spans
 
 		for _, span := range spans {
-			wrappedSpan, accepted := sp.sampler.resample(span)
+			managedSpan, accepted := sp.sampler.resample(span)
 			if accepted {
-				filteredSpans = append(filteredSpans, wrappedSpan)
+				filteredSpans = append(filteredSpans, managedSpan)
 			}
 		}
 
@@ -69,7 +69,7 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 		}
 	} else {
 		for _, span := range spans {
-			filteredSpans = append(filteredSpans, wrappedSpan{roSpan: span})
+			filteredSpans = append(filteredSpans, managedSpan{span: span})
 		}
 	}
 
