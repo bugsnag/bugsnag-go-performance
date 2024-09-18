@@ -2,14 +2,12 @@ package bugsnagperformance
 
 import (
 	"testing"
-
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 func TestDefaultHeaderValue(t *testing.T) {
 	enc := &samplingHeaderEncoder{}
 
-	result := enc.encode([]sdktrace.ReadOnlySpan{})
+	result := enc.encode([]managedSpan{})
 	if result != "1.0:0" {
 		t.Errorf("Expected '1.0:0', got %s", result)
 	}

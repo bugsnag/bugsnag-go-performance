@@ -4,20 +4,18 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type samplingHeaderEncoder struct{}
 
-func (enc *samplingHeaderEncoder) encode(spans []trace.ReadOnlySpan) string {
+func (enc *samplingHeaderEncoder) encode(spans []managedSpan) string {
 	if len(spans) == 0 {
 		return "1.0:0"
 	}
 
 	mappedValues := map[string]int{}
 	for _, span := range spans {
-		attributes := span.Attributes()
+		attributes := span.span.Attributes()
 		found := false
 		for _, keyVal := range attributes {
 			if keyVal.Key == "bugsnag.sampling.p" {

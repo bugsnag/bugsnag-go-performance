@@ -10,7 +10,7 @@ import (
 type payloadEncoder struct {
 }
 
-func (enc *payloadEncoder) encode(spans []trace.ReadOnlySpan) map[string]interface{} {
+func (enc *payloadEncoder) encode(spans []managedSpan) map[string]interface{} {
 	encodedResult := map[string]interface{}{}
 	encodedResourceSpans := []interface{}{}
 	encodedScopeSpans := []interface{}{}
@@ -33,8 +33,8 @@ func (enc *payloadEncoder) encode(spans []trace.ReadOnlySpan) map[string]interfa
 
 			encodedScopeSpans = append(encodedScopeSpans, map[string]interface{}{
 				"scope": map[string]interface{}{
-					"name":    scopeSpansArr[0].InstrumentationScope().Name,
-					"version": scopeSpansArr[0].InstrumentationScope().Version,
+					"name":    scopeSpansArr[0].span.InstrumentationScope().Name,
+					"version": scopeSpansArr[0].span.InstrumentationScope().Version,
 				},
 				"spans": encodedScopeSpansArr,
 			})
@@ -42,7 +42,7 @@ func (enc *payloadEncoder) encode(spans []trace.ReadOnlySpan) map[string]interfa
 
 		encodedResourceSpans = append(encodedResourceSpans, map[string]interface{}{
 			"resource": map[string]interface{}{
-				"attributes": enc.attributesToSlice(resourceSpans[0].Resource().Attributes()),
+				"attributes": enc.attributesToSlice(resourceSpans[0].span.Resource().Attributes()),
 			},
 			"scopeSpans": encodedScopeSpans,
 		})
@@ -53,66 +53,66 @@ func (enc *payloadEncoder) encode(spans []trace.ReadOnlySpan) map[string]interfa
 	return encodedResult
 }
 
-func (enc *payloadEncoder) sortSpansByResource(spans []trace.ReadOnlySpan) map[attribute.Distinct][]trace.ReadOnlySpan {
-	spansByResource := map[attribute.Distinct][]trace.ReadOnlySpan{}
+func (enc *payloadEncoder) sortSpansByResource(spans []managedSpan) map[attribute.Distinct][]managedSpan {
+	spansByResource := map[attribute.Distinct][]managedSpan{}
 	for _, span := range spans {
-		mapKey := span.Resource().Equivalent()
+		mapKey := span.span.Resource().Equivalent()
 		if spansByResource[mapKey] == nil {
-			spansByResource[mapKey] = []trace.ReadOnlySpan{}
+			spansByResource[mapKey] = []managedSpan{}
 		}
 		spansByResource[mapKey] = append(spansByResource[mapKey], span)
 	}
 	return spansByResource
 }
 
-func (enc *payloadEncoder) sortSpansByScope(spans []trace.ReadOnlySpan) map[string][]trace.ReadOnlySpan {
-	spansByScope := map[string][]trace.ReadOnlySpan{}
+func (enc *payloadEncoder) sortSpansByScope(spans []managedSpan) map[string][]managedSpan {
+	spansByScope := map[string][]managedSpan{}
 	for _, span := range spans {
-		mapKey := span.InstrumentationScope().Name
+		mapKey := span.span.InstrumentationScope().Name
 		if spansByScope[mapKey] == nil {
-			spansByScope[mapKey] = []trace.ReadOnlySpan{}
+			spansByScope[mapKey] = []managedSpan{}
 		}
 		spansByScope[mapKey] = append(spansByScope[mapKey], span)
 	}
 	return spansByScope
 }
 
-func (enc *payloadEncoder) spanToMap(span trace.ReadOnlySpan) map[string]interface{} {
+func (enc *payloadEncoder) spanToMap(span managedSpan) map[string]interface{} {
 
 	encodedSpan := map[string]interface{}{
-		"name":                   span.Name(),
-		"kind":                   int(span.SpanKind()),
-		"startTimeUnixNano":      strconv.FormatInt(span.StartTime().UnixNano(), 10),
-		"endTimeUnixNano":        strconv.FormatInt(span.EndTime().UnixNano(), 10),
-		"droppedAttributesCount": span.DroppedAttributes(),
-		"droppedEventsCount":     span.DroppedEvents(),
-		"droppedLinksCount":      span.DroppedLinks(),
+		"name":                   span.span.Name(),
+		"kind":                   int(span.span.SpanKind()),
+		"startTimeUnixNano":      strconv.FormatInt(span.span.StartTime().UnixNano(), 10),
+		"endTimeUnixNano":        strconv.FormatInt(span.span.EndTime().UnixNano(), 10),
+		"droppedAttributesCount": span.span.DroppedAttributes(),
+		"droppedEventsCount":     span.span.DroppedEvents(),
+		"droppedLinksCount":      span.span.DroppedLinks(),
 		"status": map[string]interface{}{
-			"code":    span.Status().Code,
-			"message": span.Status().Description,
+			"code":    span.span.Status().Code,
+			"message": span.span.Status().Description,
 		},
 	}
 
-	if span.Parent().SpanID().IsValid() {
-		encodedSpan["parentSpanId"] = span.Parent().SpanID().String()
+	if span.span.Parent().SpanID().IsValid() {
+		encodedSpan["parentSpanId"] = span.span.Parent().SpanID().String()
 	}
-	if span.SpanContext().HasTraceID() {
-		encodedSpan["traceId"] = span.SpanContext().TraceID().String()
+	if span.span.SpanContext().HasTraceID() {
+		encodedSpan["traceId"] = span.span.SpanContext().TraceID().String()
 	}
-	if span.SpanContext().HasSpanID() {
-		encodedSpan["spanId"] = span.SpanContext().SpanID().String()
+	if span.span.SpanContext().HasSpanID() {
+		encodedSpan["spanId"] = span.span.SpanContext().SpanID().String()
 	}
-	if traceState := span.Parent().TraceState().String(); traceState != "" {
+	if traceState := span.span.Parent().TraceState().String(); traceState != "" {
 		encodedSpan["traceState"] = traceState
 	}
 
-	attr := enc.attributesToSlice(span.Attributes())
+	attr := enc.attributesToSlice(span.span.Attributes())
 	encodedSpan["attributes"] = attr
 
-	events := enc.eventsToSlice(span.Events())
+	events := enc.eventsToSlice(span.span.Events())
 	encodedSpan["events"] = events
 
-	links := enc.linksToSlice(span.Links())
+	links := enc.linksToSlice(span.span.Links())
 	encodedSpan["links"] = links
 
 	return encodedSpan

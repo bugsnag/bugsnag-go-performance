@@ -18,6 +18,11 @@ type SpanExporter struct {
 	paylodEnc                   *payloadEncoder
 }
 
+type managedSpan struct {
+	samplingProbability *float64
+	span                trace.ReadOnlySpan
+}
+
 func CreateSpanExporter(probMgr *probabilityManager) trace.SpanExporter {
 	delivery := createDelivery(Config.Endpoint, Config.APIKey)
 
@@ -41,10 +46,15 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 		managedStatus = "unmanaged"
 	}
 
+	filteredSpans := []managedSpan{}
+	for _, span := range spans {
+		filteredSpans = append(filteredSpans, managedSpan{span: span})
+	}
+
 	headers := map[string]string{}
 	if !sp.unmanagedMode {
 
-		samplingHeader := sp.sampleHeaderEnc.encode(spans)
+		samplingHeader := sp.sampleHeaderEnc.encode(filteredSpans)
 
 		if samplingHeader == "" {
 			fmt.Println("One or more spans are missing the 'bugsnag.sampling.p' attribute. This trace will be sent as unmanaged")
@@ -60,7 +70,7 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	}
 
 	// encode to JSON
-	encodedPayload := sp.paylodEnc.encode(spans)
+	encodedPayload := sp.paylodEnc.encode(filteredSpans)
 	payload, err := json.Marshal(encodedPayload)
 	if err != nil {
 		fmt.Printf("Error encoding spans: %v\n", err)
