@@ -74,11 +74,7 @@ func (s *Sampler) resample(span sdktrace.ReadOnlySpan) bool {
 }
 
 func (s *Sampler) sampleUsingProbabilityAndTrace(probability float64, traceState trace.TraceState, traceID trace.TraceID) bool {
-	parsedState, err := s.parser.parse(traceState)
-	if err != nil {
-		fmt.Printf("Error parsing tracestate: %v\n", err)
-		return true
-	}
+	parsedState := s.parser.parse(traceState)
 
 	if parsedState.isValid() {
 		if parsedState.isValue32() {
@@ -92,7 +88,7 @@ func (s *Sampler) sampleUsingProbabilityAndTrace(probability float64, traceState
 		}
 	} else {
 		var rValue uint64
-		err = binary.Read(bytes.NewBuffer(traceID[:]), binary.LittleEndian, &rValue)
+		err := binary.Read(bytes.NewBuffer(traceID[:]), binary.LittleEndian, &rValue)
 		if err != nil {
 			fmt.Printf("Error parsing trace ID: %v\n", err)
 			return true

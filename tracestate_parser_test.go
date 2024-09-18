@@ -9,11 +9,8 @@ import (
 func TestEmptyTracestate(t *testing.T) {
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("")
-	parsedState, err := parser.parse(state)
+	parsedState := parser.parse(state)
 
-	if err == nil {
-		t.Fatalf("Expected error on parsing state")
-	}
 	if parsedState.isValid() != false {
 		t.Fatalf("Expected parsed state to be invalid")
 	}
@@ -31,11 +28,8 @@ func TestEmptyTracestate(t *testing.T) {
 func TestTracestateNoSmartbearValues(t *testing.T) {
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op")
-	parsedState, err := parser.parse(state)
+	parsedState := parser.parse(state)
 
-	if err == nil {
-		t.Fatalf("Expected error parsing tracestate")
-	}
 	if parsedState.isValid() != false {
 		t.Fatalf("Expected parsed state to be invalid")
 	}
@@ -53,11 +47,8 @@ func TestTracestateNoSmartbearValues(t *testing.T) {
 func TestTracestateNoVersion64(t *testing.T) {
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=r64:1234")
-	parsedState, err := parser.parse(state)
+	parsedState := parser.parse(state)
 
-	if err != nil {
-		t.Fatalf("Should not return error")
-	}
 	if parsedState.isValid() != false {
 		t.Fatalf("Expected parsed state to be invalid")
 	}
@@ -75,11 +66,8 @@ func TestTracestateNoVersion64(t *testing.T) {
 func TestTracestateNoVersion32(t *testing.T) {
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=r32:1234")
-	parsedState, err := parser.parse(state)
+	parsedState := parser.parse(state)
 
-	if err != nil {
-		t.Fatalf("Should not return error")
-	}
 	if parsedState.isValid() != false {
 		t.Fatalf("Expected parsed state to be invalid")
 	}
@@ -97,11 +85,8 @@ func TestTracestateNoVersion32(t *testing.T) {
 func TestTracestateNoRValue(t *testing.T) {
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=v:1")
-	parsedState, err := parser.parse(state)
+	parsedState := parser.parse(state)
 
-	if err != nil {
-		t.Fatalf("Should not return error")
-	}
 	if parsedState.isValid() != false {
 		t.Fatalf("Expected parsed state to be invalid")
 	}
@@ -119,11 +104,8 @@ func TestTracestateNoRValue(t *testing.T) {
 func TestTracestateFull64(t *testing.T) {
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=v:2;r64:999")
-	parsedState, err := parser.parse(state)
+	parsedState := parser.parse(state)
 
-	if err != nil {
-		t.Fatalf("Should not return error")
-	}
 	if parsedState.isValid() == false {
 		t.Fatalf("Expected parsed state to be valid")
 	}
@@ -147,11 +129,8 @@ func TestTracestateFull64(t *testing.T) {
 func TestTracestateFull32(t *testing.T) {
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=v:2;r32:999")
-	parsedState, err := parser.parse(state)
+	parsedState := parser.parse(state)
 
-	if err != nil {
-		t.Fatalf("Should not return error")
-	}
 	if parsedState.isValid() == false {
 		t.Fatalf("Expected parsed state to be valid")
 	}
