@@ -13,6 +13,7 @@ type SpanExporter struct {
 	unmanagedMode               bool
 	loggedFirstBatchDestination bool
 	probabilityManager          *probabilityManager
+	sampler                     *Sampler
 	delivery                    *delivery
 	sampleHeaderEnc             *samplingHeaderEncoder
 	paylodEnc                   *payloadEncoder
@@ -23,7 +24,7 @@ type managedSpan struct {
 	span                trace.ReadOnlySpan
 }
 
-func CreateSpanExporter(probMgr *probabilityManager) trace.SpanExporter {
+func CreateSpanExporter(probMgr *probabilityManager, sampler *Sampler) trace.SpanExporter {
 	delivery := createDelivery(Config.Endpoint, Config.APIKey)
 
 	sp := SpanExporter{
@@ -31,6 +32,7 @@ func CreateSpanExporter(probMgr *probabilityManager) trace.SpanExporter {
 		loggedFirstBatchDestination: false,
 		probabilityManager:          probMgr,
 		delivery:                    delivery,
+		sampler:                     sampler,
 	}
 
 	return &sp
@@ -47,20 +49,26 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	}
 
 	filteredSpans := []managedSpan{}
-	for _, span := range spans {
-		filteredSpans = append(filteredSpans, managedSpan{span: span})
-	}
-
 	headers := map[string]string{}
 	if !sp.unmanagedMode {
+		// resample spans
+		for _, span := range spans {
+			managedSpan, accepted := sp.sampler.resample(span)
+			if accepted {
+				filteredSpans = append(filteredSpans, managedSpan)
+			}
+		}
 
 		samplingHeader := sp.sampleHeaderEnc.encode(filteredSpans)
-
 		if samplingHeader == "" {
 			fmt.Println("One or more spans are missing the 'bugsnag.sampling.p' attribute. This trace will be sent as unmanaged")
 			managedStatus = "unmanaged"
 		} else {
 			headers[SPAN_SAMPLING_HEADER] = samplingHeader
+		}
+	} else {
+		for _, span := range spans {
+			filteredSpans = append(filteredSpans, managedSpan{span: span})
 		}
 	}
 

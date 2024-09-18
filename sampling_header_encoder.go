@@ -20,7 +20,12 @@ func (enc *samplingHeaderEncoder) encode(spans []managedSpan) string {
 		found := false
 		for _, keyVal := range attributes {
 			if keyVal.Key == "bugsnag.sampling.p" {
-				mappedValues[keyVal.Value.AsFloat64()] += 1
+				// was resampled
+				if span.samplingProbability != nil {
+					mappedValues[*span.samplingProbability] += 1
+				} else {
+					mappedValues[keyVal.Value.AsFloat64()] += 1
+				}
 				found = true
 				break
 			}

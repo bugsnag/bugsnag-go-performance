@@ -101,21 +101,21 @@ func TestAttributes(t *testing.T) {
 	}
 }
 
-//func TestResampled(t *testing.T) {
-//	enc := &samplingHeaderEncoder{}
-//	testExporter := tracetest.NewInMemoryExporter()
-//	tracerProvider := trace.NewTracerProvider(trace.WithSpanProcessor(trace.NewSimpleSpanProcessor(testExporter)))
-//
-//	makeSpan(tracerProvider, "test", 0.1)
-//	makeSpan(tracerProvider, "test2", 0.2)
-//	makeSpan(tracerProvider, "test3", 0.1)
-//
-//	spans := getSpans(testExporter)
-//	newProbability := 0.2
-//	spans[0].samplingProbability = &newProbability
-//
-//	result := enc.encode(spans)
-//	if result != "0.1:1;0.2:2" {
-//		t.Errorf("Expected '0.1:1;0.2:2', got %s", result)
-//	}
-//}
+func TestResampled(t *testing.T) {
+	enc := &samplingHeaderEncoder{}
+	testExporter := tracetest.NewInMemoryExporter()
+	tracerProvider := trace.NewTracerProvider(trace.WithSpanProcessor(trace.NewSimpleSpanProcessor(testExporter)))
+
+	makeSpan(tracerProvider, "test", 0.1)
+	makeSpan(tracerProvider, "test2", 0.2)
+	makeSpan(tracerProvider, "test3", 0.1)
+
+	spans := getSpans(testExporter)
+	newProbability := 0.2
+	spans[0].samplingProbability = &newProbability
+
+	result := enc.encode(spans)
+	if result != "0.1:1;0.2:2" {
+		t.Errorf("Expected '0.1:1;0.2:2', got %s", result)
+	}
+}
