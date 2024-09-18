@@ -10,7 +10,7 @@ type Configuration struct {
 	// Your Bugsnag API key, e.g. "c9d60ae4c7e70c4b6c4ebd3e8056d2b8". You can
 	// find this by clicking Settings on https://bugsnag.com/.
 	APIKey string
-	
+
 	// The currently running version of the app. This is used to filter errors
 	// in the Bugsnag dasboard. If you set this then Bugsnag will only re-open
 	// resolved errors if they happen in different app versions.
@@ -27,7 +27,7 @@ type Configuration struct {
 	// The Release stages to send traces in. If you set this then bugsnag-go-performance will
 	// only send traces to Bugsnag if the ReleaseStage is listed here.
 	EnabledReleaseStages []string
-	
+
 	// TODO write logger - wrapper for OTEL logs
 	Logger interface{}
 }

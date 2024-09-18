@@ -12,7 +12,7 @@ const SAMPLING_PROBABILITY_HEADER = "Bugsnag-Sampling-Probability"
 const SPAN_SAMPLING_HEADER = "Bugsnag-Span-Sampling"
 
 type response struct {
-	statusCode int
+	statusCode         int
 	samplingProbablity *float64
 }
 
@@ -20,7 +20,7 @@ func newParsedResponse(rawResponse http.Response) response {
 	probability := parseSamplingProbability(rawResponse)
 
 	return response{
-		statusCode: rawResponse.StatusCode,
+		statusCode:         rawResponse.StatusCode,
 		samplingProbablity: probability,
 	}
 }
@@ -73,8 +73,8 @@ func (d *delivery) sendPayload(payload []byte) (*http.Response, error) {
 
 func createDelivery(uri, apiKey string) *delivery {
 	headers := map[string]string{
-		"Bugsnag-Api-Key":       apiKey,
-		"Content-Type":          "application/json",
+		"Bugsnag-Api-Key": apiKey,
+		"Content-Type":    "application/json",
 	}
 
 	return &delivery{

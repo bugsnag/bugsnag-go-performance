@@ -8,7 +8,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-type samplingHeaderEncoder struct {}
+type samplingHeaderEncoder struct{}
 
 func (enc *samplingHeaderEncoder) encode(spans []trace.ReadOnlySpan) string {
 	if len(spans) == 0 {
@@ -30,7 +30,7 @@ func (enc *samplingHeaderEncoder) encode(spans []trace.ReadOnlySpan) string {
 
 		if !found {
 			// Bail if the atrribute is missing; we'll warn about this later as it
-      // means something has gone wrong
+			// means something has gone wrong
 			return ""
 		}
 	}

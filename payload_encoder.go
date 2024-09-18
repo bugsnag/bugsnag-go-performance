@@ -53,7 +53,7 @@ func (enc *payloadEncoder) encode(spans []trace.ReadOnlySpan) map[string]interfa
 	return encodedResult
 }
 
-func (enc *payloadEncoder) sortSpansByResource(spans []trace.ReadOnlySpan)  map[attribute.Distinct][]trace.ReadOnlySpan {
+func (enc *payloadEncoder) sortSpansByResource(spans []trace.ReadOnlySpan) map[attribute.Distinct][]trace.ReadOnlySpan {
 	spansByResource := map[attribute.Distinct][]trace.ReadOnlySpan{}
 	for _, span := range spans {
 		mapKey := span.Resource().Equivalent()
