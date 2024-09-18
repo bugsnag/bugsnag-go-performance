@@ -31,7 +31,7 @@ func parseSamplingProbability(rawResponse http.Response) *float64 {
 	probabilityHeader := rawResponse.Header.Get(SAMPLING_PROBABILITY_HEADER)
 	if probabilityHeader != "" {
 		value, err := strconv.ParseFloat(probabilityHeader, 64)
-		if err != nil {
+		if err == nil {
 			if value <= 1.0 && value >= 0.0 {
 				probability = &value
 			} else {

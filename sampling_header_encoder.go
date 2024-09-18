@@ -2,6 +2,7 @@ package bugsnagperformance
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -13,14 +14,13 @@ func (enc *samplingHeaderEncoder) encode(spans []managedSpan) string {
 		return "1.0:0"
 	}
 
-	mappedValues := map[string]int{}
+	mappedValues := map[float64]int{}
 	for _, span := range spans {
 		attributes := span.span.Attributes()
 		found := false
 		for _, keyVal := range attributes {
 			if keyVal.Key == "bugsnag.sampling.p" {
-				value := keyVal.Value.AsFloat64()
-				mappedValues[strconv.FormatFloat(value, 'g', -1, 64)] += 1
+				mappedValues[keyVal.Value.AsFloat64()] += 1
 				found = true
 				break
 			}
@@ -33,9 +33,20 @@ func (enc *samplingHeaderEncoder) encode(spans []managedSpan) string {
 		}
 	}
 
+	// Sort the keys so the result is deterministic
+	keysSlice := []float64{}
+	for key := range mappedValues {
+		keysSlice = append(keysSlice, key)
+	}
+	sort.Float64s(keysSlice)
+
 	valuesSlice := []string{}
-	for key, val := range mappedValues {
-		valuesSlice = append(valuesSlice, fmt.Sprintf("%+v:%+v", key, val))
+	for _, key := range keysSlice {
+		keyStr := strconv.FormatFloat(key, 'g', -1, 64)
+		if keyStr == "1" {
+			keyStr = "1.0"
+		}
+		valuesSlice = append(valuesSlice, fmt.Sprintf("%+v:%+v", keyStr, mappedValues[key]))
 	}
 
 	return strings.Join(valuesSlice[:], ";")
