@@ -87,5 +87,5 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: maze_output.zip
+        name: maze_output-${{ matrix.go-version }}-${{ matrix.otel-version }}.zip
         path: go/src/github.com/bugsnag/bugsnag-go-performance/maze_output/maze_output.zip
