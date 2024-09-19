@@ -81,4 +81,9 @@ jobs:
       env:
         GO_VERSION: ${{ matrix.go-version }}
         OTEL_VERSION: ${{ matrix.otel-version }}
-      run: DEBUG=1 bundle exec maze-runner --color --format progress
+      run: DEBUG=1 bundle exec maze-runner
+    - name: Upload maze_output.zip
+      uses: actions/upload-artifact@v4
+      with:
+        name: maze_output.zip
+        path: maze_output/maze_output.zip
