@@ -20,5 +20,5 @@ services:
     restart: "no"
     command: go run .
     volumes:
-      - ./maze_output:/app/src/github.com/bugsnag/bugsnag-go-performance/maze_output
+      - ../../maze_output:/app/src/github.com/bugsnag/bugsnag-go-performance/maze_output
 
