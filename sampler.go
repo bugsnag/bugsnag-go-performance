@@ -82,13 +82,13 @@ func (s *Sampler) sampleUsingProbabilityAndTrace(probability float64, traceState
 			return pValue >= rValue
 		} else {
 			rValue := parsedState.getRValue64()
-			pValue := uint64(probability * PROBABILITY_SCALE_FACTOR_64)
+			pValue := uint64(math.Floor(probability * PROBABILITY_SCALE_FACTOR_64))
 			return pValue >= rValue
 		}
 	} else {
 		traceIDRaw := [16]byte(traceID)
 		rValue := binary.BigEndian.Uint64(traceIDRaw[8:])
-		pValue := uint64(probability * PROBABILITY_SCALE_FACTOR_64)
+		pValue := uint64(math.Floor(probability * PROBABILITY_SCALE_FACTOR_64))
 		return pValue >= rValue
 	}
 }
