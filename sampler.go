@@ -3,15 +3,19 @@ package bugsnagperformance
 import (
 	"encoding/binary"
 	"math"
+	"math/big"
 
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 )
 
+var (
+	PROBABILITY_SCALE_FACTOR_64 = new(big.Float).SetUint64(math.MaxUint64) // (2 ** 64) - 1
+)
+
 const (
-	PROBABILITY_SCALE_FACTOR_64 float64 = 18_446_744_073_709_551_615 // (2 ** 64) - 1
-	PROBABILITY_SCALE_FACTOR_32 float64 = 4_294_967_295              // (2 ** 32) - 1
+	PROBABILITY_SCALE_FACTOR_32 float64 = 4_294_967_295 // (2 ** 32) - 1
 )
 
 type Sampler struct {
@@ -82,13 +86,19 @@ func (s *Sampler) sampleUsingProbabilityAndTrace(probability float64, traceState
 			return pValue >= rValue
 		} else {
 			rValue := parsedState.getRValue64()
-			pValue := uint64(math.Floor(probability * PROBABILITY_SCALE_FACTOR_64))
+			probabilityBig := new(big.Float).SetFloat64(probability)
+			pValueRes := new(big.Float)
+			pValueRes = pValueRes.Mul(probabilityBig, PROBABILITY_SCALE_FACTOR_64)
+			pValue, _ := pValueRes.Uint64()
 			return pValue >= rValue
 		}
 	} else {
 		traceIDRaw := [16]byte(traceID)
 		rValue := binary.BigEndian.Uint64(traceIDRaw[8:])
-		pValue := uint64(math.Floor(probability * PROBABILITY_SCALE_FACTOR_64))
+		probabilityBig := new(big.Float).SetFloat64(probability)
+		pValueRes := new(big.Float)
+		pValueRes = pValueRes.Mul(probabilityBig, PROBABILITY_SCALE_FACTOR_64)
+		pValue, _ := pValueRes.Uint64()
 		return pValue >= rValue
 	}
 }
