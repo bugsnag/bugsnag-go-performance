@@ -1,18 +1,21 @@
 package bugsnagperformance
 
 import (
-	"bytes"
 	"encoding/binary"
-	"fmt"
+	"math"
+	"math/big"
 
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 )
 
+var (
+	PROBABILITY_SCALE_FACTOR_64 = new(big.Float).SetUint64(math.MaxUint64) // (2 ** 64) - 1
+)
+
 const (
-	PROBABILITY_SCALE_FACTOR_64 float64 = 18_446_744_073_709_551_615 // (2 ** 64) - 1
-	PROBABILITY_SCALE_FACTOR_32 float32 = 4_294_967_295              // (2 ** 32) - 1
+	PROBABILITY_SCALE_FACTOR_32 float64 = 4_294_967_295 // (2 ** 32) - 1
 )
 
 type Sampler struct {
@@ -20,7 +23,7 @@ type Sampler struct {
 	parser  *tracestateParser
 }
 
-func CreateSampler(probManager *probabilityManager) sdktrace.Sampler {
+func CreateSampler(probManager *probabilityManager) *Sampler {
 	sampler := Sampler{
 		probMgr: probManager,
 		parser:  &tracestateParser{},
@@ -52,52 +55,50 @@ func (s *Sampler) ShouldSample(parameters sdktrace.SamplingParameters) sdktrace.
 	}
 }
 
-func (s *Sampler) resample(span sdktrace.ReadOnlySpan) bool {
+func (s *Sampler) resample(span sdktrace.ReadOnlySpan) (managedSpan, bool) {
+	managedSpan := managedSpan{span: span}
 	attributes := attribute.NewSet(span.Attributes()...)
 
 	// sample all spans that are missing the p value attribute
 	if attributes.Len() == 0 || !attributes.HasValue("bugsnag.sampling.p") {
-		return true
+		return managedSpan, true
 	}
 
 	probability := s.probMgr.getProbability()
 	value, _ := attributes.Value("bugsnag.sampling.p")
 	value64 := value.AsFloat64()
 	if value64 > probability {
-		// TODO update the p value attribute
-		// but the span is readonly...
-
 		value64 = probability
+		managedSpan.samplingProbability = &value64
 	}
 
-	return s.sampleUsingProbabilityAndTrace(value64, span.SpanContext().TraceState(), span.SpanContext().TraceID())
+	result := s.sampleUsingProbabilityAndTrace(value64, span.SpanContext().TraceState(), span.SpanContext().TraceID())
+	return managedSpan, result
 }
 
 func (s *Sampler) sampleUsingProbabilityAndTrace(probability float64, traceState trace.TraceState, traceID trace.TraceID) bool {
-	parsedState, err := s.parser.parse(traceState)
-	if err != nil {
-		fmt.Printf("Error parsing tracestate: %v\n", err)
-		return true
-	}
+	parsedState := s.parser.parse(traceState)
 
 	if parsedState.isValid() {
 		if parsedState.isValue32() {
 			rValue := parsedState.getRValue32()
-			pValue := uint32(float32(probability) * PROBABILITY_SCALE_FACTOR_32)
+			pValue := uint32(math.Floor(probability * PROBABILITY_SCALE_FACTOR_32))
 			return pValue >= rValue
 		} else {
 			rValue := parsedState.getRValue64()
-			pValue := uint64(probability * PROBABILITY_SCALE_FACTOR_64)
+			probabilityBig := new(big.Float).SetFloat64(probability)
+			pValueRes := new(big.Float)
+			pValueRes = pValueRes.Mul(probabilityBig, PROBABILITY_SCALE_FACTOR_64)
+			pValue, _ := pValueRes.Uint64()
 			return pValue >= rValue
 		}
 	} else {
-		var rValue uint64
-		err = binary.Read(bytes.NewBuffer(traceID[:]), binary.LittleEndian, &rValue)
-		if err != nil {
-			fmt.Printf("Error parsing trace ID: %v\n", err)
-			return true
-		}
-		pValue := uint64(probability * PROBABILITY_SCALE_FACTOR_64)
+		traceIDRaw := [16]byte(traceID)
+		rValue := binary.BigEndian.Uint64(traceIDRaw[8:])
+		probabilityBig := new(big.Float).SetFloat64(probability)
+		pValueRes := new(big.Float)
+		pValueRes = pValueRes.Mul(probabilityBig, PROBABILITY_SCALE_FACTOR_64)
+		pValue, _ := pValueRes.Uint64()
 		return pValue >= rValue
 	}
 }

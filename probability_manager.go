@@ -7,7 +7,7 @@ type probabilityManager struct {
 func CreateProbabilityManager() *probabilityManager {
 	// TODO - implement probability manager
 	return &probabilityManager{
-		probability: 0.5,
+		probability: 1.0,
 	}
 }
 
