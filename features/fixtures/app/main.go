@@ -27,7 +27,7 @@ func HandledScenario() (string, func()) {
 
 		// TODO - hardcoded sampling attribute
 		span.SetAttributes(attribute.KeyValue{
-			Key: "bugsnag.sampling.p",
+			Key:   "bugsnag.sampling.p",
 			Value: attribute.Float64Value(1.0),
 		})
 		span.End()
@@ -54,12 +54,12 @@ func configureOtel(addr string) {
 	traceRes, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
-		semconv.SchemaURL,
-		semconv.ServiceName("basic app"),
-		semconv.ServiceVersion("1.22.333"),
-		semconv.DeviceID("1"),
-		semconv.DeploymentEnvironment("production"),
-	))
+			semconv.SchemaURL,
+			semconv.ServiceName("basic app"),
+			semconv.ServiceVersion("1.22.333"),
+			semconv.DeviceID("1"),
+			semconv.DeploymentEnvironment("production"),
+		))
 	if err != nil {
 		fmt.Printf("Error while creating resource: %+v\n", err)
 	}

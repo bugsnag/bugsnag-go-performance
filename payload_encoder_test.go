@@ -29,11 +29,11 @@ var encodedTestEvents = []map[string]interface{}{
 	{
 		"name":         "event1",
 		"timeUnixNano": int64(957142923000000000),
-		"attributes": []map[string]interface{}{},
+		"attributes":   []map[string]interface{}{},
 	}, {
 		"name":         "event2",
 		"timeUnixNano": int64(956624523000000000),
-		"attributes": []map[string]interface{}{},
+		"attributes":   []map[string]interface{}{},
 	},
 }
 
@@ -59,11 +59,11 @@ func prepareLinks() []sdktrace.Link {
 	spCtx1, spCtx2 := prepareSpanContexts()
 	link1 := sdktrace.Link{
 		SpanContext: spCtx1,
-		Attributes: []attribute.KeyValue{},
+		Attributes:  []attribute.KeyValue{},
 	}
 	link2 := sdktrace.Link{
 		SpanContext: spCtx2,
-		Attributes: []attribute.KeyValue{},
+		Attributes:  []attribute.KeyValue{},
 	}
 
 	return []sdktrace.Link{link1, link2}
@@ -71,13 +71,13 @@ func prepareLinks() []sdktrace.Link {
 
 func prepareEvents() []sdktrace.Event {
 	event1 := sdktrace.Event{
-		Name: "event1",
-		Time: time.Date(2000, time.May, 01, 1, 2, 3, 0, time.UTC),
+		Name:       "event1",
+		Time:       time.Date(2000, time.May, 01, 1, 2, 3, 0, time.UTC),
 		Attributes: []attribute.KeyValue{},
 	}
 	event2 := sdktrace.Event{
-		Name: "event2",
-		Time: time.Date(2000, time.April, 25, 1, 2, 3, 0, time.UTC),
+		Name:       "event2",
+		Time:       time.Date(2000, time.April, 25, 1, 2, 3, 0, time.UTC),
 		Attributes: []attribute.KeyValue{},
 	}
 	return []sdktrace.Event{event1, event2}
