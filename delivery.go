@@ -8,9 +8,6 @@ import (
 	"time"
 )
 
-const SAMPLING_PROBABILITY_HEADER = "Bugsnag-Sampling-Probability"
-const SPAN_SAMPLING_HEADER = "Bugsnag-Span-Sampling"
-
 type response struct {
 	statusCode         int
 	samplingProbablity *float64

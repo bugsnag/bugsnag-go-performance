@@ -27,7 +27,7 @@ func HandledScenario() (string, func()) {
 
 		// TODO - hardcoded sampling attribute
 		span.SetAttributes(attribute.KeyValue{
-			Key:   "bugsnag.sampling.p",
+			Key:   bsgperf.BUGSNAG_SAMPLING_ATTRIBUTE,
 			Value: attribute.Float64Value(1.0),
 		})
 		span.End()

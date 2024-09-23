@@ -19,7 +19,7 @@ func (enc *samplingHeaderEncoder) encode(spans []managedSpan) string {
 		attributes := span.span.Attributes()
 		found := false
 		for _, keyVal := range attributes {
-			if keyVal.Key == "bugsnag.sampling.p" {
+			if keyVal.Key == BUGSNAG_SAMPLING_ATTRIBUTE {
 				// was resampled
 				if span.samplingProbability != nil {
 					mappedValues[*span.samplingProbability] += 1

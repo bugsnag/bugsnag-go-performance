@@ -50,7 +50,7 @@ func (s *Sampler) ShouldSample(parameters sdktrace.SamplingParameters) sdktrace.
 
 	return sdktrace.SamplingResult{
 		Decision:   decision,
-		Attributes: []attribute.KeyValue{{Key: "bugsnag.sampling.p", Value: attribute.Float64Value(probability)}},
+		Attributes: []attribute.KeyValue{{Key: BUGSNAG_SAMPLING_ATTRIBUTE, Value: attribute.Float64Value(probability)}},
 		Tracestate: traceState,
 	}
 }
@@ -60,12 +60,12 @@ func (s *Sampler) resample(span sdktrace.ReadOnlySpan) (managedSpan, bool) {
 	attributes := attribute.NewSet(span.Attributes()...)
 
 	// sample all spans that are missing the p value attribute
-	if attributes.Len() == 0 || !attributes.HasValue("bugsnag.sampling.p") {
+	if attributes.Len() == 0 || !attributes.HasValue(BUGSNAG_SAMPLING_ATTRIBUTE) {
 		return managedSpan, true
 	}
 
 	probability := s.probMgr.getProbability()
-	value, _ := attributes.Value("bugsnag.sampling.p")
+	value, _ := attributes.Value(BUGSNAG_SAMPLING_ATTRIBUTE)
 	value64 := value.AsFloat64()
 	if value64 > probability {
 		value64 = probability
