@@ -38,13 +38,17 @@ func HandledScenario() (string, func()) {
 func configureOtel(addr string) {
 	otelOptions := []trace.TracerProviderOption{}
 
-	_, bsgExporter, err := bsgperf.Configure(bsgperf.Configuration{
+	_, attrProcessor, bsgExporter, err := bsgperf.Configure(bsgperf.Configuration{
 		APIKey:   "a35a2a72bd230ac0aa0f52715bbdc6aa",
 		Endpoint: fmt.Sprintf("%v/traces", addr),
 	})
 	if err != nil {
 		fmt.Printf("Error while creating bugsnag-go-performance: %+v\n", err)
 		return
+	}
+
+	if attrProcessor != nil {
+		otelOptions = append(otelOptions, trace.WithSpanProcessor(attrProcessor))
 	}
 
 	if bsgExporter != nil {
