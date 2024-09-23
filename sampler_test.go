@@ -14,7 +14,7 @@ import (
 func TestShouldSampleOnProbability1(t *testing.T) {
 	tracestate, _ := trace.ParseTraceState("")
 	traceID, _ := trace.TraceIDFromHex("0102030405060708090a0b0c0d0e0f10")
-	sampler := CreateSampler(nil)
+	sampler := createSampler(nil)
 	decision := sampler.sampleUsingProbabilityAndTrace(1.0, tracestate, traceID)
 	if !decision {
 		t.Errorf("Expected true, got false")
@@ -24,7 +24,7 @@ func TestShouldSampleOnProbability1(t *testing.T) {
 func TestShouldNotSampleOnProbability0(t *testing.T) {
 	tracestate, _ := trace.ParseTraceState("")
 	traceID, _ := trace.TraceIDFromHex("0102030405060708090a0b0c0d0e0f10")
-	sampler := CreateSampler(nil)
+	sampler := createSampler(nil)
 	decision := sampler.sampleUsingProbabilityAndTrace(0.0, tracestate, traceID)
 	if decision {
 		t.Errorf("Expected false, got true")
@@ -34,7 +34,7 @@ func TestShouldNotSampleOnProbability0(t *testing.T) {
 func TestSampleWithSpecificTraceID(t *testing.T) {
 	tracestate, _ := trace.ParseTraceState("")
 	traceID, _ := trace.TraceIDFromHex("2b0eb6c82ae431ad7fdc00306faebef6")
-	sampler := CreateSampler(nil)
+	sampler := createSampler(nil)
 	decision := sampler.sampleUsingProbabilityAndTrace(float64(0.5), tracestate, traceID)
 	if !decision {
 		t.Errorf("Expected true, got false")
@@ -44,7 +44,7 @@ func TestSampleWithSpecificTraceID(t *testing.T) {
 func TestNotSampleWithSpecificTraceID(t *testing.T) {
 	tracestate, _ := trace.ParseTraceState("")
 	traceID, _ := trace.TraceIDFromHex("98e03bf7fc2715bdcf426f549ca74150")
-	sampler := CreateSampler(nil)
+	sampler := createSampler(nil)
 	decision := sampler.sampleUsingProbabilityAndTrace(float64(0.5), tracestate, traceID)
 	if decision {
 		t.Errorf("Expected false, got true")
@@ -62,7 +62,7 @@ func TestShouldSampleHalfOfSpans(t *testing.T) {
 	spanCtx := trace.NewSpanContext(ctxConfig)
 	ctx := trace.ContextWithSpanContext(context.Background(), spanCtx)
 
-	sampler := CreateSampler(probMgr)
+	sampler := createSampler(probMgr)
 
 	sampledCounter := 0
 	for i := 0; i < 50_000; i++ {
@@ -91,7 +91,7 @@ func TestShouldSampleHalfOfSpans(t *testing.T) {
 func TestResample(t *testing.T) {
 	probMgr := &probabilityManager{}
 	probMgr.probability = 0.5
-	sampler := CreateSampler(probMgr)
+	sampler := createSampler(probMgr)
 
 	testExporter := tracetest.NewInMemoryExporter()
 	tracerProvider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(sdktrace.NewSimpleSpanProcessor(testExporter)))
@@ -152,7 +152,7 @@ func TestSampleUsingTracestate(t *testing.T) {
 		rand.Read(traceIDBytes)
 		traceID, _ := trace.TraceIDFromHex(hex.EncodeToString(traceIDBytes))
 
-		sampler := CreateSampler(probMgr)
+		sampler := createSampler(probMgr)
 
 		res := sampler.ShouldSample(sdktrace.SamplingParameters{
 			ParentContext: ctx,

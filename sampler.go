@@ -23,7 +23,7 @@ type Sampler struct {
 	parser  *tracestateParser
 }
 
-func CreateSampler(probManager *probabilityManager) *Sampler {
+func createSampler(probManager *probabilityManager) *Sampler {
 	sampler := Sampler{
 		probMgr: probManager,
 		parser:  &tracestateParser{},

@@ -24,7 +24,7 @@ type managedSpan struct {
 	span                trace.ReadOnlySpan
 }
 
-func CreateSpanExporter(probMgr *probabilityManager, sampler *Sampler) trace.SpanExporter {
+func createSpanExporter(probMgr *probabilityManager, sampler *Sampler) trace.SpanExporter {
 	delivery := createDelivery(Config.Endpoint, Config.APIKey)
 
 	sp := SpanExporter{

@@ -4,7 +4,7 @@ type probabilityManager struct {
 	probability float64
 }
 
-func CreateProbabilityManager() *probabilityManager {
+func createProbabilityManager() *probabilityManager {
 	// TODO - implement probability manager
 	return &probabilityManager{
 		probability: 1.0,
