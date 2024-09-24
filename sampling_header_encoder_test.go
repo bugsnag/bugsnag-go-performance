@@ -13,7 +13,7 @@ func makeSpan(tp *trace.TracerProvider, name string, probability ...float64) {
 	_, span := tp.Tracer("test").Start(context.Background(), name)
 
 	if len(probability) > 0 {
-		span.SetAttributes(attribute.Float64("bugsnag.sampling.p", probability[0]))
+		span.SetAttributes(attribute.Float64(samplingAttribute, probability[0]))
 	}
 
 	span.End()

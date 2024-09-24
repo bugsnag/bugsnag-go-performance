@@ -10,7 +10,6 @@ import (
 
 	bsgperf "github.com/bugsnag/bugsnag-go-performance"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
@@ -24,12 +23,6 @@ func HandledScenario() (string, func()) {
 	f := func() {
 		fmt.Println("HELLO WORLD")
 		_, span := otel.GetTracerProvider().Tracer("maze-test").Start(context.Background(), "HandledScenario")
-
-		// TODO - hardcoded sampling attribute
-		span.SetAttributes(attribute.KeyValue{
-			Key:   "bugsnag.sampling.p",
-			Value: attribute.Float64Value(1.0),
-		})
 		span.End()
 	}
 	return "OUTPUT", f
@@ -38,7 +31,7 @@ func HandledScenario() (string, func()) {
 func configureOtel(addr string) {
 	otelOptions := []trace.TracerProviderOption{}
 
-	_, bsgExporter, err := bsgperf.Configure(bsgperf.Configuration{
+	_, processors, err := bsgperf.Configure(bsgperf.Configuration{
 		APIKey:   "a35a2a72bd230ac0aa0f52715bbdc6aa",
 		Endpoint: fmt.Sprintf("%v/traces", addr),
 	})
@@ -47,8 +40,8 @@ func configureOtel(addr string) {
 		return
 	}
 
-	if bsgExporter != nil {
-		otelOptions = append(otelOptions, trace.WithSpanProcessor(bsgExporter))
+	for _, processor := range processors {
+		otelOptions = append(otelOptions, trace.WithSpanProcessor(processor))
 	}
 
 	traceRes, err := resource.Merge(
