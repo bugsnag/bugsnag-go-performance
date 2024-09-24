@@ -1,6 +1,7 @@
 package bugsnagperformance
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -33,7 +34,8 @@ func Configure(config Configuration) (trace.Sampler, []trace.SpanProcessor, erro
 		return nil, nil, err
 	}
 
-	probabilityManager := createProbabilityManager()
+	// TODO get context from user
+	probabilityManager := createProbabilityManager(context.Background(), REFRESH_INTERVAL, RETRY_INTERVAL)
 	sampler := createSampler(probabilityManager)
 	spanExporter := createSpanExporter(probabilityManager, sampler)
 	probAttrProcessor := createProbabilityAttributeProcessor(probabilityManager)
