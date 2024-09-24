@@ -8,6 +8,7 @@ import (
 )
 
 func TestParsedEmptyResponse(t *testing.T) {
+	resetEnv()
 	rawResponse := http.Response{}
 	response := newParsedResponse(rawResponse)
 
@@ -21,6 +22,7 @@ func TestParsedEmptyResponse(t *testing.T) {
 }
 
 func TestParsedIncorrectHeader(t *testing.T) {
+	resetEnv()
 	header := map[string][]string{
 		samplingResponseHeader: {"invalid"},
 	}
@@ -37,6 +39,7 @@ func TestParsedIncorrectHeader(t *testing.T) {
 }
 
 func TestParsedIncorrectProbability(t *testing.T) {
+	resetEnv()
 	header := map[string][]string{
 		samplingResponseHeader: {"2.0"},
 	}
@@ -53,6 +56,7 @@ func TestParsedIncorrectProbability(t *testing.T) {
 }
 
 func TestParsedCorrectProbability(t *testing.T) {
+	resetEnv()
 	header := map[string][]string{
 		samplingResponseHeader: {"0.5"},
 	}
@@ -69,6 +73,7 @@ func TestParsedCorrectProbability(t *testing.T) {
 }
 
 func TestHeadersPresentAtSend(t *testing.T) {
+	resetEnv()
 	testAPIKey := "12356789"
 
 	testSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +95,9 @@ func TestHeadersPresentAtSend(t *testing.T) {
 	}))
 	defer testSrv.Close()
 
-	delivery := createDelivery(testSrv.URL, testAPIKey)
+	Config.Endpoint = testSrv.URL
+	Config.APIKey = testAPIKey
+	delivery := createDelivery()
 	_, err := delivery.send(map[string]string{"key1": "value1"}, []byte("test"))
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)

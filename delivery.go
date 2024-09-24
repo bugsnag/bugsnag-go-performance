@@ -68,15 +68,15 @@ func (d *delivery) sendPayload(payload []byte) (*http.Response, error) {
 	return resp, nil
 }
 
-func createDelivery(uri, apiKey string) *delivery {
+func createDelivery() *delivery {
 	headers := map[string]string{
-		"Bugsnag-Api-Key": apiKey,
+		"Bugsnag-Api-Key": Config.APIKey,
 		"Content-Type":    "application/json",
 		"User-Agent":      fmt.Sprintf("Go Bugsnag Performance SDK v%v", Version),
 	}
 
 	return &delivery{
-		uri:     uri,
+		uri:     Config.Endpoint,
 		headers: headers,
 	}
 }

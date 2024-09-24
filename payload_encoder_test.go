@@ -84,6 +84,7 @@ func prepareEvents() []sdktrace.Event {
 }
 
 func TestAttributesToJSON(t *testing.T) {
+	resetEnv()
 	pe := &payloadEncoder{}
 	attributes := []attribute.KeyValue{
 		{
@@ -119,6 +120,7 @@ func TestAttributesToJSON(t *testing.T) {
 }
 
 func TestLinksListEncoding(t *testing.T) {
+	resetEnv()
 	pe := &payloadEncoder{}
 	output := pe.linksToSlice(prepareLinks())
 
@@ -128,6 +130,7 @@ func TestLinksListEncoding(t *testing.T) {
 }
 
 func TestEventListEncoding(t *testing.T) {
+	resetEnv()
 	pe := &payloadEncoder{}
 	output := pe.eventsToSlice(prepareEvents())
 

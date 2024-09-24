@@ -7,17 +7,9 @@ import (
 	"testing"
 )
 
-func resetEnv() {
-	os.Clearenv()
-	Config = Configuration{
-		ReleaseStage: "production",
-	}
-}
-
 // Needs to be first to test sync.Once for loadEnv
 func TestConfigureTwiceEnv(t *testing.T) {
 	resetEnv()
-
 	testConfig := Configuration{
 		APIKey:               "aaa",
 		Endpoint:             "https://aaa.otlp.bugsnag.com/v1/traces",
@@ -53,7 +45,6 @@ func TestConfigureTwiceEnv(t *testing.T) {
 
 func TestConfigureEmpty(t *testing.T) {
 	resetEnv()
-
 	_, _, err := Configure(Configuration{})
 	if err == nil {
 		t.Error("should return error on empty api key")
@@ -62,7 +53,6 @@ func TestConfigureEmpty(t *testing.T) {
 
 func TestDefaultValues(t *testing.T) {
 	resetEnv()
-
 	testConfig := Configuration{
 		APIKey:               "aaa",
 		Endpoint:             "https://aaa.otlp.bugsnag.com/v1/traces",
@@ -83,7 +73,6 @@ func TestDefaultValues(t *testing.T) {
 
 func TestConfigureOverwriteDefault(t *testing.T) {
 	resetEnv()
-
 	testConfig := Configuration{
 		APIKey:               "bbb",
 		Endpoint:             "myendpoint",
@@ -103,7 +92,6 @@ func TestConfigureOverwriteDefault(t *testing.T) {
 
 func TestConfigureMixedSetup(t *testing.T) {
 	resetEnv()
-
 	testConfig := Configuration{
 		APIKey:               "bbb",
 		Endpoint:             "https://bbb.otlp.bugsnag.com/v1/traces",
@@ -130,7 +118,6 @@ func TestConfigureMixedSetup(t *testing.T) {
 
 func TestConfigureTwice(t *testing.T) {
 	resetEnv()
-
 	testConfig := Configuration{
 		APIKey:               "aaa",
 		Endpoint:             "https://aaa.otlp.bugsnag.com/v1/traces",
@@ -166,7 +153,6 @@ func TestConfigureTwice(t *testing.T) {
 
 func TestConfigureNotifierEnv(t *testing.T) {
 	resetEnv()
-
 	testConfig := Configuration{
 		APIKey:               "aaa",
 		Endpoint:             "https://aaa.otlp.bugsnag.com/v1/traces",

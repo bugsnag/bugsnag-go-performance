@@ -3,7 +3,6 @@ package bugsnagperformance
 import (
 	"context"
 	"sync"
-	"time"
 )
 
 type probabilityManager struct {
@@ -12,13 +11,13 @@ type probabilityManager struct {
 	mtx                sync.Mutex
 }
 
-func createProbabilityManager(ctx context.Context, refreshInterval, retryInterval time.Duration) *probabilityManager {
+func createProbabilityManager(ctx context.Context, delivery *delivery) *probabilityManager {
 	probMgr := &probabilityManager{
 		probability: 1.0,
 	}
 
 	// Will fetch value from the server and update the probability on start
-	probFetch := CreateProbabilityFetcher(ctx, refreshInterval, retryInterval, probMgr.setProbability)
+	probFetch := createProbabilityFetcher(ctx, delivery, probMgr.setProbability)
 	probMgr.probabilityFetcher = probFetch
 	go probFetch.fetchProbability()
 
