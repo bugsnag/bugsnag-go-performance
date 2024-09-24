@@ -34,10 +34,11 @@ func Configure(config Configuration) (trace.Sampler, []trace.SpanProcessor, erro
 		return nil, nil, err
 	}
 
+	delivery := createDelivery()
 	// TODO get context from user
-	probabilityManager := createProbabilityManager(context.Background(), REFRESH_INTERVAL, RETRY_INTERVAL)
+	probabilityManager := createProbabilityManager(context.Background(), delivery)
 	sampler := createSampler(probabilityManager)
-	spanExporter := createSpanExporter(probabilityManager, sampler)
+	spanExporter := createSpanExporter(probabilityManager, sampler, delivery)
 	probAttrProcessor := createProbabilityAttributeProcessor(probabilityManager)
 	// Batch processor with default settings
 	bsgSpanProcessor := trace.NewBatchSpanProcessor(spanExporter)

@@ -7,6 +7,7 @@ import (
 )
 
 func TestEmptyTracestate(t *testing.T) {
+	resetEnv()
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("")
 	parsedState := parser.parse(state)
@@ -26,6 +27,7 @@ func TestEmptyTracestate(t *testing.T) {
 }
 
 func TestTracestateNoSmartbearValues(t *testing.T) {
+	resetEnv()
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op")
 	parsedState := parser.parse(state)
@@ -45,6 +47,7 @@ func TestTracestateNoSmartbearValues(t *testing.T) {
 }
 
 func TestTracestateNoVersion64(t *testing.T) {
+	resetEnv()
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=r64:1234")
 	parsedState := parser.parse(state)
@@ -64,6 +67,7 @@ func TestTracestateNoVersion64(t *testing.T) {
 }
 
 func TestTracestateNoVersion32(t *testing.T) {
+	resetEnv()
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=r32:1234")
 	parsedState := parser.parse(state)
@@ -83,6 +87,7 @@ func TestTracestateNoVersion32(t *testing.T) {
 }
 
 func TestTracestateNoRValue(t *testing.T) {
+	resetEnv()
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=v:1")
 	parsedState := parser.parse(state)
@@ -102,6 +107,7 @@ func TestTracestateNoRValue(t *testing.T) {
 }
 
 func TestTracestateFull64(t *testing.T) {
+	resetEnv()
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=v:2;r64:999")
 	parsedState := parser.parse(state)
@@ -127,6 +133,7 @@ func TestTracestateFull64(t *testing.T) {
 }
 
 func TestTracestateFull32(t *testing.T) {
+	resetEnv()
 	parser := &tracestateParser{}
 	state, _ := trace.ParseTraceState("ab=c:1,xyz=lmn:op,sb=v:2;r32:999")
 	parsedState := parser.parse(state)

@@ -29,6 +29,7 @@ func getSpans(exporter *tracetest.InMemoryExporter) []managedSpan {
 }
 
 func TestDefaultHeaderValue(t *testing.T) {
+	resetEnv()
 	enc := &samplingHeaderEncoder{}
 
 	result := enc.encode([]managedSpan{})
@@ -38,6 +39,7 @@ func TestDefaultHeaderValue(t *testing.T) {
 }
 
 func TestMissingAttribute(t *testing.T) {
+	resetEnv()
 	enc := &samplingHeaderEncoder{}
 	testExporter := tracetest.NewInMemoryExporter()
 	tracerProvider := trace.NewTracerProvider(trace.WithSpanProcessor(trace.NewSimpleSpanProcessor(testExporter)))
@@ -68,6 +70,7 @@ var attrTests = []samplingHeaderTestData{
 }
 
 func TestAttributes(t *testing.T) {
+	resetEnv()
 	//prepare huge array of probabilities
 	probabilities := make([]float64, 300)
 	for i := 0; i < 100; i++ {
@@ -102,6 +105,7 @@ func TestAttributes(t *testing.T) {
 }
 
 func TestResampled(t *testing.T) {
+	resetEnv()
 	enc := &samplingHeaderEncoder{}
 	testExporter := tracetest.NewInMemoryExporter()
 	tracerProvider := trace.NewTracerProvider(trace.WithSpanProcessor(trace.NewSimpleSpanProcessor(testExporter)))

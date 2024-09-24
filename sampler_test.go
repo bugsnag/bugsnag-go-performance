@@ -12,6 +12,7 @@ import (
 )
 
 func TestShouldSampleOnProbability1(t *testing.T) {
+	resetEnv()
 	tracestate, _ := trace.ParseTraceState("")
 	traceID, _ := trace.TraceIDFromHex("0102030405060708090a0b0c0d0e0f10")
 	sampler := createSampler(nil)
@@ -22,6 +23,7 @@ func TestShouldSampleOnProbability1(t *testing.T) {
 }
 
 func TestShouldNotSampleOnProbability0(t *testing.T) {
+	resetEnv()
 	tracestate, _ := trace.ParseTraceState("")
 	traceID, _ := trace.TraceIDFromHex("0102030405060708090a0b0c0d0e0f10")
 	sampler := createSampler(nil)
@@ -32,6 +34,7 @@ func TestShouldNotSampleOnProbability0(t *testing.T) {
 }
 
 func TestSampleWithSpecificTraceID(t *testing.T) {
+	resetEnv()
 	tracestate, _ := trace.ParseTraceState("")
 	traceID, _ := trace.TraceIDFromHex("2b0eb6c82ae431ad7fdc00306faebef6")
 	sampler := createSampler(nil)
@@ -42,6 +45,7 @@ func TestSampleWithSpecificTraceID(t *testing.T) {
 }
 
 func TestNotSampleWithSpecificTraceID(t *testing.T) {
+	resetEnv()
 	tracestate, _ := trace.ParseTraceState("")
 	traceID, _ := trace.TraceIDFromHex("98e03bf7fc2715bdcf426f549ca74150")
 	sampler := createSampler(nil)
@@ -52,6 +56,7 @@ func TestNotSampleWithSpecificTraceID(t *testing.T) {
 }
 
 func TestShouldSampleHalfOfSpans(t *testing.T) {
+	resetEnv()
 	probMgr := &probabilityManager{}
 	probMgr.probability = 0.5
 
@@ -89,6 +94,7 @@ func TestShouldSampleHalfOfSpans(t *testing.T) {
 }
 
 func TestResample(t *testing.T) {
+	resetEnv()
 	probMgr := &probabilityManager{}
 	probMgr.probability = 0.5
 	sampler := createSampler(probMgr)
@@ -138,6 +144,7 @@ var samplerTests = []samplerTestData{
 }
 
 func TestSampleUsingTracestate(t *testing.T) {
+	resetEnv()
 	for _, item := range samplerTests {
 		probMgr := &probabilityManager{}
 		probMgr.probability = item.probability

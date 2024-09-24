@@ -11,7 +11,6 @@ import (
 
 func TestFetchCorrectProbability(t *testing.T) {
 	resetEnv()
-
 	testSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(samplingResponseHeader, "0.1234")
 	}))
@@ -26,13 +25,12 @@ func TestFetchCorrectProbability(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	pf := CreateProbabilityFetcher(ctx, 50*time.Second, 300*time.Millisecond, testCallback)
+	pf := createProbabilityFetcherInternal(ctx, 50*time.Second, 300*time.Millisecond, createDelivery(), testCallback)
 	pf.fetchProbability()
 }
 
 func TestRetriesForError(t *testing.T) {
 	resetEnv()
-
 	count := 0
 	testSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if count == 5 {
@@ -55,13 +53,12 @@ func TestRetriesForError(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	pf := CreateProbabilityFetcher(ctx, 50*time.Second, 300*time.Millisecond, testCallback)
+	pf := createProbabilityFetcherInternal(ctx, 50*time.Second, 300*time.Millisecond, createDelivery(), testCallback)
 	pf.fetchProbability()
 }
 
 func TestRetriesOnIncorrectValue(t *testing.T) {
 	resetEnv()
-
 	count := 0
 	testSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch count {
@@ -90,13 +87,12 @@ func TestRetriesOnIncorrectValue(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	pf := CreateProbabilityFetcher(ctx, 50*time.Second, 300*time.Millisecond, testCallback)
+	pf := createProbabilityFetcherInternal(ctx, 50*time.Second, 300*time.Millisecond, createDelivery(), testCallback)
 	pf.fetchProbability()
 }
 
 func TestUpdateValueAfterRefresh(t *testing.T) {
 	resetEnv()
-
 	count := 0
 	testSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch count {
@@ -123,7 +119,7 @@ func TestUpdateValueAfterRefresh(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	pf := CreateProbabilityFetcher(ctx, 2*time.Second, 300*time.Millisecond, testCallback)
+	pf := createProbabilityFetcherInternal(ctx, 2*time.Second, 300*time.Millisecond, createDelivery(), testCallback)
 	pf.fetchProbability()
 	// second fetch should be after 2 seconds
 	time.Sleep(3 * time.Second)

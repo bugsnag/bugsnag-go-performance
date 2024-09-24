@@ -9,6 +9,7 @@ import (
 )
 
 func TestDoesNotReplaceExistingAttribute(t *testing.T) {
+	resetEnv()
 	probMgr := &probabilityManager{}
 	probMgr.probability = 0.25
 	testProc := createProbabilityAttributeProcessor(probMgr)
@@ -37,6 +38,7 @@ func TestDoesNotReplaceExistingAttribute(t *testing.T) {
 }
 
 func TestAddsProbabilityAttribute(t *testing.T) {
+	resetEnv()
 	probMgr := &probabilityManager{}
 	probMgr.probability = 0.25
 	testProc := createProbabilityAttributeProcessor(probMgr)

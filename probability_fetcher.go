@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-const (
-	RETRY_INTERVAL   = 30 * time.Second
-	REFRESH_INTERVAL = 24 * time.Hour
-	REQUEST_BODY     = `{"resourceSpans": []}`
-)
-
 var REQUEST_HEADERS = map[string]string{"Bugsnag-Span-Sampling": "1.0:0"}
 
 type probabilityFetcher struct {
@@ -24,8 +18,11 @@ type probabilityFetcher struct {
 	mainProgramCtx     context.Context
 }
 
-func CreateProbabilityFetcher(ctx context.Context, refreshInterval, retryInterval time.Duration, callback func(float64)) *probabilityFetcher {
-	delivery := createDelivery(Config.Endpoint, Config.APIKey)
+func createProbabilityFetcher(ctx context.Context, delivery *delivery, callback func(float64)) *probabilityFetcher {
+	return createProbabilityFetcherInternal(ctx, fetcherRefreshInterval, fetcherRetryInterval, delivery, callback)
+}
+
+func createProbabilityFetcherInternal(ctx context.Context, refreshInterval, retryInterval time.Duration, delivery *delivery, callback func(float64)) *probabilityFetcher {
 	wakeupchan := make(chan bool)
 	sleepFor := time.NewTimer(refreshInterval)
 
@@ -45,9 +42,10 @@ func CreateProbabilityFetcher(ctx context.Context, refreshInterval, retryInterva
 }
 
 func (pf *probabilityFetcher) fetchProbability() {
+	// TODO think about retry logic - when to stop trying
 	found := false
 	for !found {
-		requestBody := []byte(REQUEST_BODY)
+		requestBody := []byte(fetcherRequestBody)
 		resp, err := pf.delivery.send(REQUEST_HEADERS, requestBody)
 
 		if err != nil || resp.StatusCode != 200 {
@@ -55,7 +53,7 @@ func (pf *probabilityFetcher) fetchProbability() {
 		} else if resp != nil {
 			parsedResp := newParsedResponse(*resp)
 			// update probability value if it is in the range [0, 1]
-			if parsedResp.samplingProbablity != nil && *parsedResp.samplingProbablity >= float64(0.0) && *parsedResp.samplingProbablity <= float64(1.0) {
+			if parsedResp.samplingProbablity != nil {
 				found = true
 				fmt.Printf("New probability value: %f\n", *parsedResp.samplingProbablity)
 				pf.onNewValueCallback(*parsedResp.samplingProbablity)
@@ -81,8 +79,8 @@ func (pf *probabilityFetcher) waitForUpdateTimer() {
 			pf.refreshTimer.Reset(pf.refreshInterval)
 		case <-pf.refreshTimer.C:
 			fmt.Printf("Timer expired, get probability value again\n")
+			// fetchProbability will reset the timer on success
 			pf.fetchProbability()
-			pf.refreshTimer.Reset(pf.refreshInterval)
 		}
 	}
 }
