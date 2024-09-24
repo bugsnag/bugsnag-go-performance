@@ -25,12 +25,12 @@ func init() {
 // Configure Bugsnag. The only required setting is the APIKey, which can be
 // obtained by clicking on "Settings" in your Bugsnag dashboard.
 // Returns OTeL sampler, probability attribute processor, trace exporter and error
-func Configure(config Configuration) (trace.Sampler, trace.SpanProcessor, trace.SpanProcessor, error) {
+func Configure(config Configuration) (trace.Sampler, []trace.SpanProcessor, error) {
 	readEnvConfigOnce.Do(Config.loadEnv)
 	Config.update(&config)
 	err := Config.validate()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	probabilityManager := createProbabilityManager()
@@ -39,6 +39,7 @@ func Configure(config Configuration) (trace.Sampler, trace.SpanProcessor, trace.
 	probAttrProcessor := createProbabilityAttributeProcessor(probabilityManager)
 	// Batch processor with default settings
 	bsgSpanProcessor := trace.NewBatchSpanProcessor(spanExporter)
+	processors := []trace.SpanProcessor{probAttrProcessor, bsgSpanProcessor}
 
-	return sampler, probAttrProcessor, bsgSpanProcessor, nil
+	return sampler, processors, nil
 }

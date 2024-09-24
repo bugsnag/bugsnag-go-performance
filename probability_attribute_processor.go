@@ -19,10 +19,10 @@ func createProbabilityAttributeProcessor(pMgr *probabilityManager) *ProbabilityA
 
 func (pap *ProbabilityAttributeProcessor) OnStart(parent context.Context, s sdktrace.ReadWriteSpan) {
 	attributeSet := attribute.NewSet(s.Attributes()...)
-	if !attributeSet.HasValue(BUGSNAG_SAMPLING_ATTRIBUTE) {
+	if !attributeSet.HasValue(samplingAttribute) {
 		oldAttributes := s.Attributes()
 		newAttributes := append(oldAttributes, attribute.KeyValue{
-			Key:   BUGSNAG_SAMPLING_ATTRIBUTE,
+			Key:   samplingAttribute,
 			Value: attribute.Float64Value(pap.probabilityManager.getProbability()),
 		})
 		s.SetAttributes(newAttributes...)

@@ -27,8 +27,8 @@ func TestDoesNotReplaceExistingAttribute(t *testing.T) {
 	stubs := testExporter.GetSpans()
 	for _, span := range stubs {
 		attributeSet := attribute.NewSet(span.Attributes...)
-		if attributeSet.HasValue(BUGSNAG_SAMPLING_ATTRIBUTE) {
-			val, ok := attributeSet.Value(BUGSNAG_SAMPLING_ATTRIBUTE)
+		if attributeSet.HasValue(samplingAttribute) {
+			val, ok := attributeSet.Value(samplingAttribute)
 			if !ok || val == attribute.Float64Value(0.25) {
 				t.Errorf("Expected attribute processor to not overwrite existing value")
 			}
@@ -55,8 +55,8 @@ func TestAddsProbabilityAttribute(t *testing.T) {
 	stubs := testExporter.GetSpans()
 	for _, span := range stubs {
 		attributeSet := attribute.NewSet(span.Attributes...)
-		if attributeSet.HasValue(BUGSNAG_SAMPLING_ATTRIBUTE) {
-			val, ok := attributeSet.Value(BUGSNAG_SAMPLING_ATTRIBUTE)
+		if attributeSet.HasValue(samplingAttribute) {
+			val, ok := attributeSet.Value(samplingAttribute)
 			if !ok || val != attribute.Float64Value(0.25) {
 				t.Errorf("Expected attribute processor to add attribute, got %v", val)
 			}

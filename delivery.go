@@ -25,7 +25,7 @@ func newParsedResponse(rawResponse http.Response) response {
 func parseSamplingProbability(rawResponse http.Response) *float64 {
 	var probability *float64
 
-	probabilityHeader := rawResponse.Header.Get(SAMPLING_PROBABILITY_HEADER)
+	probabilityHeader := rawResponse.Header.Get(samplingResponseHeader)
 	if probabilityHeader != "" {
 		value, err := strconv.ParseFloat(probabilityHeader, 64)
 		if err == nil {

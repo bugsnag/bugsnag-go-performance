@@ -22,7 +22,7 @@ func TestParsedEmptyResponse(t *testing.T) {
 
 func TestParsedIncorrectHeader(t *testing.T) {
 	header := map[string][]string{
-		SAMPLING_PROBABILITY_HEADER: {"invalid"},
+		samplingResponseHeader: {"invalid"},
 	}
 	rawResponse := http.Response{Header: header, StatusCode: 200}
 	response := newParsedResponse(rawResponse)
@@ -38,7 +38,7 @@ func TestParsedIncorrectHeader(t *testing.T) {
 
 func TestParsedIncorrectProbability(t *testing.T) {
 	header := map[string][]string{
-		SAMPLING_PROBABILITY_HEADER: {"2.0"},
+		samplingResponseHeader: {"2.0"},
 	}
 	rawResponse := http.Response{Header: header, StatusCode: 200}
 	response := newParsedResponse(rawResponse)
@@ -54,7 +54,7 @@ func TestParsedIncorrectProbability(t *testing.T) {
 
 func TestParsedCorrectProbability(t *testing.T) {
 	header := map[string][]string{
-		SAMPLING_PROBABILITY_HEADER: {"0.5"},
+		samplingResponseHeader: {"0.5"},
 	}
 	rawResponse := http.Response{Header: header, StatusCode: 200}
 	response := newParsedResponse(rawResponse)
