@@ -75,6 +75,7 @@ func createDelivery(uri, apiKey string) *delivery {
 	headers := map[string]string{
 		"Bugsnag-Api-Key": apiKey,
 		"Content-Type":    "application/json",
+		"User-Agent":      fmt.Sprintf("Go Bugsnag Performance SDK v%v", Version),
 	}
 
 	return &delivery{
