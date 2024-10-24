@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -15,25 +14,26 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
-var scenariosMap = map[string]func() (string, func()){
-	"HandledScenario": HandledScenario,
+var scenariosMap = map[string]func() (resourceData, func()){
+	"ManualTraceScenario":          ManualTraceScenario,
+	"DisabledReleaseStageScenario": DisabledReleaseStageScenario,
 }
 
-func HandledScenario() (string, func()) {
-	f := func() {
-		fmt.Println("HELLO WORLD")
-		_, span := otel.GetTracerProvider().Tracer("maze-test").Start(context.Background(), "HandledScenario")
-		span.End()
-	}
-	return "OUTPUT", f
+type resourceData struct {
+	serviceName           string
+	serviceVersion        string
+	deviceID              string
+	deploymentEnvironment string
 }
 
-func configureOtel(addr string) {
+func configureOtel(addr string, resourceData resourceData) {
 	otelOptions := []trace.TracerProviderOption{}
 
 	_, processors, err := bsgperf.Configure(bsgperf.Configuration{
-		APIKey:   "a35a2a72bd230ac0aa0f52715bbdc6aa",
-		Endpoint: fmt.Sprintf("%v/traces", addr),
+		APIKey:               "a35a2a72bd230ac0aa0f52715bbdc6aa",
+		Endpoint:             fmt.Sprintf("%v/traces", addr),
+		EnabledReleaseStages: []string{"production", "staging"},
+		ReleaseStage:         resourceData.deploymentEnvironment,
 	})
 	if err != nil {
 		fmt.Printf("Error while creating bugsnag-go-performance: %+v\n", err)
@@ -44,14 +44,15 @@ func configureOtel(addr string) {
 		otelOptions = append(otelOptions, trace.WithSpanProcessor(processor))
 	}
 
+	// TODO - return resource object from Configure?
 	traceRes, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceName("basic app"),
-			semconv.ServiceVersion("1.22.333"),
-			semconv.DeviceID("1"),
-			semconv.DeploymentEnvironment("production"),
+			semconv.ServiceName(resourceData.serviceName),
+			semconv.ServiceVersion(resourceData.serviceVersion),
+			semconv.DeviceID(resourceData.deviceID),
+			semconv.DeploymentEnvironment(resourceData.deploymentEnvironment),
 		))
 	if err != nil {
 		fmt.Printf("Error while creating resource: %+v\n", err)
@@ -74,8 +75,6 @@ func main() {
 		addr = DEFAULT_MAZE_ADDRESS
 	}
 
-	configureOtel(addr)
-
 	for {
 		select {
 		case <-ticker.C:
@@ -86,8 +85,8 @@ func main() {
 			if command.Action == "run-scenario" {
 				prepareScenarioFunc, ok := scenariosMap[command.ScenarioName]
 				if ok {
-					_, scenarioFunc := prepareScenarioFunc()
-					//bugsnag.Configure(config)
+					resourceData, scenarioFunc := prepareScenarioFunc()
+					configureOtel(addr, resourceData)
 					scenarioFunc()
 				}
 			}
