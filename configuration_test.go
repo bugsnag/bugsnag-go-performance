@@ -22,7 +22,7 @@ func TestConfigureTwiceEnv(t *testing.T) {
 	os.Setenv("BUGSNAG_PERFORMANCE_RELEASE_STAGE", "prod1")
 	os.Setenv("BUGSNAG_PERFORMANCE_ENABLED_RELEASE_STAGES", "prod1,prod2")
 
-	_, _, err := Configure(Configuration{})
+	_, err := Configure(Configuration{})
 	if err != nil {
 		t.Error("should not return error")
 	}
@@ -34,7 +34,7 @@ func TestConfigureTwiceEnv(t *testing.T) {
 	os.Setenv("BUGSNAG_PERFORMANCE_RELEASE_STAGE", "prod3")
 	os.Setenv("BUGSNAG_PERFORMANCE_ENABLED_RELEASE_STAGES", "prod3,prod4")
 
-	_, _, err = Configure(Configuration{APIKey: "aaa"})
+	_, err = Configure(Configuration{APIKey: "aaa"})
 	if err != nil {
 		t.Error("should not return error")
 	}
@@ -45,7 +45,7 @@ func TestConfigureTwiceEnv(t *testing.T) {
 
 func TestConfigureEmpty(t *testing.T) {
 	resetEnv()
-	_, _, err := Configure(Configuration{})
+	_, err := Configure(Configuration{})
 	if err == nil {
 		t.Error("should return error on empty api key")
 	}
@@ -61,7 +61,7 @@ func TestDefaultValues(t *testing.T) {
 		EnabledReleaseStages: []string{},
 		Logger:               nil}
 
-	_, _, err := Configure(Configuration{APIKey: "aaa"})
+	_, err := Configure(Configuration{APIKey: "aaa"})
 	if err != nil {
 		t.Error("should not return error")
 	}
@@ -81,7 +81,7 @@ func TestConfigureOverwriteDefault(t *testing.T) {
 		EnabledReleaseStages: []string{"dev"},
 		Logger:               nil}
 
-	_, _, err := Configure(testConfig)
+	_, err := Configure(testConfig)
 	if err != nil {
 		t.Error("should not return error")
 	}
@@ -107,7 +107,7 @@ func TestConfigureMixedSetup(t *testing.T) {
 
 	// Has to be called manually, sync.Once already ran
 	Config.loadEnv()
-	_, _, err := Configure(Configuration{AppVersion: "123"})
+	_, err := Configure(Configuration{AppVersion: "123"})
 	if err != nil {
 		t.Error("should not return error")
 	}
@@ -126,7 +126,7 @@ func TestConfigureTwice(t *testing.T) {
 		EnabledReleaseStages: []string{},
 		Logger:               nil}
 
-	_, _, err := Configure(testConfig)
+	_, err := Configure(testConfig)
 	if err != nil {
 		t.Error("should not return error")
 	}
@@ -142,7 +142,7 @@ func TestConfigureTwice(t *testing.T) {
 		EnabledReleaseStages: []string{},
 		Logger:               nil}
 
-	_, _, err = Configure(testConfig2)
+	_, err = Configure(testConfig2)
 	if err != nil {
 		t.Error("should not return error")
 	}
@@ -168,7 +168,7 @@ func TestConfigureNotifierEnv(t *testing.T) {
 
 	// Has to be called manually, sync.Once already ran
 	Config.loadEnv()
-	_, _, err := Configure(Configuration{})
+	_, err := Configure(Configuration{})
 	if err != nil {
 		t.Error("should not return error")
 	}

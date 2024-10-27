@@ -6,6 +6,8 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+
+	bsgperf "github.com/bugsnag/bugsnag-go-performance"
 )
 
 func createSpans(scenarioName string) {
@@ -20,30 +22,41 @@ func createSpans(scenarioName string) {
 	}
 }
 
-func ManualTraceScenario() (resourceData, func()) {
+func ManualTraceScenario() (resourceData, bsgperf.Configuration, func()) {
 	f := func() {
 		fmt.Println("[Bugsnag] ManualTraceScenario")
 		createSpans("ManualTraceScenario")
 	}
-	resource := resourceData{
-		serviceName:           "basic app",
-		serviceVersion:        "1.22.333",
-		deviceID:              "1",
-		deploymentEnvironment: "staging",
+	config := bsgperf.Configuration{
+		APIKey:               "a35a2a72bd230ac0aa0f52715bbdc6aa",
+		EnabledReleaseStages: []string{"production", "staging"},
+		ReleaseStage:         "staging",
 	}
-	return resource, f
+
+	resource := resourceData{
+		serviceName:    "basic app",
+		serviceVersion: "1.22.333",
+		deviceID:       "1",
+	}
+	return resource, config, f
 }
 
-func DisabledReleaseStageScenario() (resourceData, func()) {
+func DisabledReleaseStageScenario() (resourceData, bsgperf.Configuration, func()) {
 	f := func() {
 		fmt.Println("[Bugsnag] ManualTraceScenario")
 		createSpans("DisabledReleaseStageScenario")
 	}
-	resource := resourceData{
-		serviceName:           "basic app",
-		serviceVersion:        "1.22.333",
-		deviceID:              "1",
-		deploymentEnvironment: "development",
+
+	config := bsgperf.Configuration{
+		APIKey:               "a35a2a72bd230ac0aa0f52715bbdc6aa",
+		EnabledReleaseStages: []string{"production", "staging"},
+		ReleaseStage:         "development",
 	}
-	return resource, f
+
+	resource := resourceData{
+		serviceName:    "basic app",
+		serviceVersion: "1.22.333",
+		deviceID:       "1",
+	}
+	return resource, config, f
 }

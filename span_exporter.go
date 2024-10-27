@@ -24,13 +24,14 @@ type managedSpan struct {
 	span                trace.ReadOnlySpan
 }
 
-func createSpanExporter(probMgr *probabilityManager, sampler *Sampler, delivery *delivery) trace.SpanExporter {
+func createSpanExporter(probMgr *probabilityManager, sampler *Sampler, delivery *delivery, unmanaged bool) trace.SpanExporter {
 	sp := SpanExporter{
 		disabled:                    false,
 		loggedFirstBatchDestination: false,
 		probabilityManager:          probMgr,
 		delivery:                    delivery,
 		sampler:                     sampler,
+		unmanagedMode:               unmanaged,
 	}
 
 	return &sp
@@ -48,6 +49,9 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 
 	filteredSpans := []managedSpan{}
 	headers := map[string]string{}
+
+	fmt.Printf("CURRENT UNMANAGED MODE: %+v\n", sp.unmanagedMode)
+
 	if !sp.unmanagedMode {
 		// resample spans
 		for _, span := range spans {
@@ -81,6 +85,9 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	if err != nil {
 		fmt.Printf("Error encoding spans: %v\n", err)
 	}
+
+	fmt.Printf("ENCODED PAYLOAD: %+v\n", string(payload))
+	fmt.Printf("HEADERS: %+v\n", headers)
 
 	// send payload
 	resp, err := sp.delivery.send(headers, payload)

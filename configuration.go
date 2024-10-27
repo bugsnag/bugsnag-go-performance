@@ -1,6 +1,7 @@
 package bugsnagperformance
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -28,6 +29,12 @@ type Configuration struct {
 	// only send traces to Bugsnag if the ReleaseStage is listed here.
 	EnabledReleaseStages []string
 
+	// Context created in the main program
+	// Used in probability fetcher - after this context is marked Done
+	// the goroutine will switch to a graceful shutdown
+	// and stop querying for new probability values.
+	MainContext context.Context
+
 	// TODO write logger - wrapper for OTEL logs
 	Logger interface{}
 }
@@ -48,11 +55,28 @@ func (config *Configuration) update(other *Configuration) *Configuration {
 	if other.EnabledReleaseStages != nil {
 		config.EnabledReleaseStages = other.EnabledReleaseStages
 	}
+	if other.MainContext != nil {
+		config.MainContext = other.MainContext
+	}
 	if other.Logger != nil {
 		config.Logger = other.Logger
 	}
 
 	return config
+}
+
+func (config *Configuration) isReleaseStageEnabled() bool {
+	if len(config.EnabledReleaseStages) == 0 {
+		return true
+	}
+
+	for _, stage := range config.EnabledReleaseStages {
+		if config.ReleaseStage == stage {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (config *Configuration) validate() error {

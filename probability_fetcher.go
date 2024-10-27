@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var REQUEST_HEADERS = map[string]string{"Bugsnag-Span-Sampling": "1.0:0"}
+var REQUEST_HEADERS = map[string]string{samplingRequestHeader: "1.0:0"}
 
 type probabilityFetcher struct {
 	refreshInterval    time.Duration
