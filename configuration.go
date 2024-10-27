@@ -3,6 +3,7 @@ package bugsnagperformance
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
@@ -35,8 +36,8 @@ type Configuration struct {
 	// and stop querying for new probability values.
 	MainContext context.Context
 
-	// TODO write logger - wrapper for OTEL logs
-	Logger interface{}
+	// Logger to use for debug messages
+	Logger *log.Logger
 }
 
 func (config *Configuration) update(other *Configuration) *Configuration {

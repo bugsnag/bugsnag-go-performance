@@ -32,7 +32,7 @@ func parseSamplingProbability(rawResponse http.Response) *float64 {
 			if value <= 1.0 && value >= 0.0 {
 				probability = &value
 			} else {
-				fmt.Printf("Invalid sampling probability: %v\n", value)
+				Config.Logger.Printf("Invalid sampling probability: %v\n", value)
 			}
 		}
 	}

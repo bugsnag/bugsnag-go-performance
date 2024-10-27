@@ -3,6 +3,7 @@ package bugsnagperformance
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"sync"
 
@@ -20,9 +21,10 @@ var Config Configuration
 var readEnvConfigOnce sync.Once
 
 func init() {
-	fmt.Println("Starting bugsnag performance")
+	fmt.Println("Starting bugsnag performance.")
 	Config = Configuration{
 		ReleaseStage: "production",
+		Logger:       log.New(os.Stdout, "[BugsnagPerformance] ", log.LstdFlags),
 	}
 }
 
@@ -58,13 +60,11 @@ func Configure(config Configuration) (*BugsnagPerformance, error) {
 	//       we don't control what the valid values are
 	unmanagedMode := false
 	if customSampler := os.Getenv("OTEL_TRACES_SAMPLER"); customSampler != "" {
-		fmt.Printf("UNMANAGED MODE ENABLED: %v\n", customSampler)
 		unmanagedMode = true
 	}
 
 	// Create an exporter only if the configured release stage is enabled
 	if Config.isReleaseStageEnabled() {
-		fmt.Printf("RELEASE STAGE IS ENABLED: %v\n", Config.ReleaseStage)
 		spanExporter := createSpanExporter(probabilityManager, sampler, delivery, unmanagedMode)
 		// Batch processor with default settings
 		bsgSpanProcessor := trace.NewBatchSpanProcessor(spanExporter)
