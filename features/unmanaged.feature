@@ -13,7 +13,7 @@ Scenario: Entering unmanaged mode via the OTel environment variable
 
   And the trace payload field "resourceSpans.0.resource" string attribute "service.name" equals "basic app"
   And the trace payload field "resourceSpans.0.resource" string attribute "service.version" equals "1.22.333"
-  And the trace payload field "resourceSpans.0.resource" integer attribute "device.id" equals 1
+  And the trace payload field "resourceSpans.0.resource" string attribute "device.id" equals "1"
   And the trace payload field "resourceSpans.0.resource" string attribute "deployment.environment" equals "staging"
 
   And a span named "test span 1" has the following properties:
