@@ -3,7 +3,6 @@ package bugsnagperformance
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"go.opentelemetry.io/otel/sdk/trace"
 )
@@ -24,13 +23,14 @@ type managedSpan struct {
 	span                trace.ReadOnlySpan
 }
 
-func createSpanExporter(probMgr *probabilityManager, sampler *Sampler, delivery *delivery) trace.SpanExporter {
+func createSpanExporter(probMgr *probabilityManager, sampler *Sampler, delivery *delivery, unmanaged bool) trace.SpanExporter {
 	sp := SpanExporter{
 		disabled:                    false,
 		loggedFirstBatchDestination: false,
 		probabilityManager:          probMgr,
 		delivery:                    delivery,
 		sampler:                     sampler,
+		unmanagedMode:               unmanaged,
 	}
 
 	return &sp
@@ -48,6 +48,7 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 
 	filteredSpans := []managedSpan{}
 	headers := map[string]string{}
+
 	if !sp.unmanagedMode {
 		// resample spans
 		for _, span := range spans {
@@ -59,7 +60,7 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 
 		samplingHeader := sp.sampleHeaderEnc.encode(filteredSpans)
 		if samplingHeader == "" {
-			fmt.Println("One or more spans are missing the 'bugsnag.sampling.p' attribute. This trace will be sent as unmanaged")
+			Config.Logger.Printf("One or more spans are missing the 'bugsnag.sampling.p' attribute. This trace will be sent as unmanaged.\n")
 			managedStatus = "unmanaged"
 		} else {
 			headers[samplingRequestHeader] = samplingHeader
@@ -71,7 +72,7 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	}
 
 	if !sp.loggedFirstBatchDestination {
-		fmt.Printf("Sending %+v spans to %+v\n", managedStatus, sp.delivery.uri)
+		Config.Logger.Printf("Sending %+v spans to %+v\n", managedStatus, sp.delivery.uri)
 		sp.loggedFirstBatchDestination = true
 	}
 
@@ -79,13 +80,13 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	encodedPayload := sp.paylodEnc.encode(filteredSpans)
 	payload, err := json.Marshal(encodedPayload)
 	if err != nil {
-		fmt.Printf("Error encoding spans: %v\n", err)
+		Config.Logger.Printf("Error encoding spans: %v\n", err)
 	}
 
 	// send payload
 	resp, err := sp.delivery.send(headers, payload)
 	if err != nil {
-		fmt.Printf("Error sending payload: %v\n", err)
+		Config.Logger.Printf("Error sending payload: %v\n", err)
 	}
 
 	// update sampling probability in ProbabilityManager

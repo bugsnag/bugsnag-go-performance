@@ -9,6 +9,7 @@ services:
        - GO_VERSION
        - OTEL_VERSION
     environment:
+     - OTEL_TRACES_SAMPLER
      - DEFAULT_MAZE_ADDRESS
      - BUGSNAG_PERFORMANCE_API_KEY
      - BUGSNAG_API_KEY

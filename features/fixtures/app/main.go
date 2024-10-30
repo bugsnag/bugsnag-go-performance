@@ -15,47 +15,59 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
-var scenariosMap = map[string]func() (string, func()){
-	"HandledScenario": HandledScenario,
+var scenariosMap = map[string]func() (resourceData, bsgperf.Configuration, func()){
+	"ManualTraceScenario":          ManualTraceScenario,
+	"DisabledReleaseStageScenario": DisabledReleaseStageScenario,
+	"EnvironmentConfigScenario":    EnvironmentConfigScenario,
 }
 
-func HandledScenario() (string, func()) {
-	f := func() {
-		fmt.Println("HELLO WORLD")
-		_, span := otel.GetTracerProvider().Tracer("maze-test").Start(context.Background(), "HandledScenario")
-		span.End()
-	}
-	return "OUTPUT", f
+type resourceData struct {
+	serviceName    string
+	serviceVersion string
+	deviceID       string
 }
 
-func configureOtel(addr string) {
+func configureOtel(ctx context.Context, addr string, resData resourceData, config bsgperf.Configuration) {
 	otelOptions := []trace.TracerProviderOption{}
 
-	_, processors, err := bsgperf.Configure(bsgperf.Configuration{
-		APIKey:   "a35a2a72bd230ac0aa0f52715bbdc6aa",
-		Endpoint: fmt.Sprintf("%v/traces", addr),
-	})
+	config.MainContext = ctx
+	config.Endpoint = fmt.Sprintf("%v/traces", addr)
+	bsgPerformance, err := bsgperf.Configure(config)
 	if err != nil {
 		fmt.Printf("Error while creating bugsnag-go-performance: %+v\n", err)
 		return
 	}
 
-	for _, processor := range processors {
+	for _, processor := range bsgPerformance.Processors {
 		otelOptions = append(otelOptions, trace.WithSpanProcessor(processor))
 	}
 
+	if bsgPerformance.Sampler != nil {
+		otelOptions = append(otelOptions, trace.WithSampler(bsgPerformance.Sampler))
+	}
+
+	// normal creation
 	traceRes, err := resource.Merge(
 		resource.Default(),
+		bsgPerformance.Resource,
+	)
+	if err != nil {
+		fmt.Printf("Error while merging resource: %+v\n", err)
+	}
+
+	// setup data from tests to be merged with the resource
+	traceRes, err = resource.Merge(
+		traceRes,
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceName("basic app"),
-			semconv.ServiceVersion("1.22.333"),
-			semconv.DeviceID("1"),
-			semconv.DeploymentEnvironment("production"),
-		))
+			semconv.ServiceName(resData.serviceName),
+			semconv.ServiceVersion(resData.serviceVersion),
+			semconv.DeviceID(resData.deviceID)),
+	)
 	if err != nil {
-		fmt.Printf("Error while creating resource: %+v\n", err)
+		fmt.Printf("Error while merging resource: %+v\n", err)
 	}
+
 	otelOptions = append(otelOptions, trace.WithResource(traceRes))
 
 	tracerProvider := trace.NewTracerProvider(otelOptions...)
@@ -64,6 +76,9 @@ func configureOtel(addr string) {
 
 func main() {
 	fmt.Println("[Bugsnag] Starting testapp")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Listening to the OS Signals
 	signalsChan := make(chan os.Signal, 1)
 	signal.Notify(signalsChan, syscall.SIGINT, syscall.SIGTERM)
@@ -73,8 +88,6 @@ func main() {
 	if addr == "" {
 		addr = DEFAULT_MAZE_ADDRESS
 	}
-
-	configureOtel(addr)
 
 	for {
 		select {
@@ -86,8 +99,8 @@ func main() {
 			if command.Action == "run-scenario" {
 				prepareScenarioFunc, ok := scenariosMap[command.ScenarioName]
 				if ok {
-					_, scenarioFunc := prepareScenarioFunc()
-					//bugsnag.Configure(config)
+					resData, config, scenarioFunc := prepareScenarioFunc()
+					configureOtel(ctx, addr, resData, config)
 					scenarioFunc()
 				}
 			}

@@ -32,7 +32,7 @@ func parseSamplingProbability(rawResponse http.Response) *float64 {
 			if value <= 1.0 && value >= 0.0 {
 				probability = &value
 			} else {
-				fmt.Printf("Invalid sampling probability: %v\n", value)
+				Config.Logger.Printf("Invalid sampling probability: %v\n", value)
 			}
 		}
 	}
@@ -45,7 +45,7 @@ type delivery struct {
 	headers map[string]string
 }
 
-func (d *delivery) sendPayload(payload []byte) (*http.Response, error) {
+func (d *delivery) sendPayload(headers map[string]string, payload []byte) (*http.Response, error) {
 	client := http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -56,7 +56,7 @@ func (d *delivery) sendPayload(payload []byte) (*http.Response, error) {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
 
-	for key, val := range d.headers {
+	for key, val := range headers {
 		req.Header.Set(key, val)
 	}
 
@@ -82,12 +82,17 @@ func createDelivery() *delivery {
 }
 
 func (d *delivery) send(headers map[string]string, payload []byte) (*http.Response, error) {
-	d.headers["Bugsnag-Sent-At"] = time.Now().Format(time.RFC3339)
+	newHeaders := map[string]string{}
+	newHeaders["Bugsnag-Sent-At"] = time.Now().Format(time.RFC3339)
+	// merge constant headers with the headers passed in
 	for k, v := range headers {
-		d.headers[k] = v
+		newHeaders[k] = v
+	}
+	for k, v := range d.headers {
+		newHeaders[k] = v
 	}
 
-	resp, err := d.sendPayload(payload)
+	resp, err := d.sendPayload(newHeaders, payload)
 	if err != nil {
 		return nil, fmt.Errorf("error sending payload: %v", err)
 	}
