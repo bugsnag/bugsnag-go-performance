@@ -6,6 +6,9 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type Configuration struct {
@@ -36,6 +39,14 @@ type Configuration struct {
 	// and stop querying for new probability values.
 	MainContext context.Context
 
+	// Provide custom sampler to use
+	// If not provided, the default sampler will be used
+	CustomSampler trace.Sampler
+
+	// Resource to be merged with bugsnag performance resource
+	// If not provided, the default resource will be used
+	Resource *resource.Resource
+
 	// Logger to use for debug messages
 	Logger *log.Logger
 }
@@ -58,6 +69,12 @@ func (config *Configuration) update(other *Configuration) *Configuration {
 	}
 	if other.MainContext != nil {
 		config.MainContext = other.MainContext
+	}
+	if other.CustomSampler != nil {
+		config.CustomSampler = other.CustomSampler
+	}
+	if other.Resource != nil {
+		config.Resource = other.Resource
 	}
 	if other.Logger != nil {
 		config.Logger = other.Logger

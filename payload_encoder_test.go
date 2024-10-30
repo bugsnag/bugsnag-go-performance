@@ -107,7 +107,7 @@ func TestAttributesToJSON(t *testing.T) {
 	}
 	encodedAttributes := pe.attributesToSlice(attributes)
 
-	attributesJSON := `[{"key":"key1","value":{"boolValue":true}},{"key":"key2","value":{"arrayValue":{"values":[{"boolValue":true},{"boolValue":false}]}}},{"key":"key3","value":{"doubleValue":3.14}},{"key":"key4","value":{"arrayValue":{"values":[{"doubleValue":3.14},{"doubleValue":2.71}]}}},{"key":"key5","value":{"intValue":4}},{"key":"key6","value":{"arrayValue":{"values":[{"intValue":4},{"intValue":5}]}}},{"key":"key7","value":{"stringValue":"value1"}},{"key":"key8","value":{"arrayValue":{"values":[{"stringValue":"1"},{"stringValue":"2"}]}}}]`
+	attributesJSON := `[{"key":"key1","value":{"boolValue":true}},{"key":"key2","value":{"arrayValue":{"values":[{"boolValue":true},{"boolValue":false}]}}},{"key":"key3","value":{"doubleValue":3.14}},{"key":"key4","value":{"arrayValue":{"values":[{"doubleValue":3.14},{"doubleValue":2.71}]}}},{"key":"key5","value":{"intValue":"4"}},{"key":"key6","value":{"arrayValue":{"values":[{"intValue":"4"},{"intValue":"5"}]}}},{"key":"key7","value":{"stringValue":"value1"}},{"key":"key8","value":{"arrayValue":{"values":[{"stringValue":"1"},{"stringValue":"2"}]}}}]`
 
 	payload, err := json.Marshal(encodedAttributes)
 	if err != nil {

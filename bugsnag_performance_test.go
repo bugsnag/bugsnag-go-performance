@@ -1,6 +1,7 @@
 package bugsnagperformance
 
 import (
+	"context"
 	"log"
 	"os"
 )
@@ -10,5 +11,6 @@ func resetEnv() {
 	Config = Configuration{
 		ReleaseStage: "production",
 		Logger:       log.New(os.Stdout, "[BugsnagPerformance] ", log.LstdFlags),
+		MainContext:  context.TODO(),
 	}
 }

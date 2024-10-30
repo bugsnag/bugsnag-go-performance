@@ -25,19 +25,14 @@ func init() {
 	Config = Configuration{
 		ReleaseStage: "production",
 		Logger:       log.New(os.Stdout, "[BugsnagPerformance] ", log.LstdFlags),
+		MainContext:  context.TODO(),
 	}
-}
-
-type BugsnagPerformance struct {
-	Sampler    trace.Sampler
-	Processors []trace.SpanProcessor
-	Resource   *resource.Resource
 }
 
 // Configure Bugsnag. The only required setting is the APIKey, which can be
 // obtained by clicking on "Settings" in your Bugsnag dashboard.
 // Returns OTeL sampler, probability attribute processor, trace exporter and error
-func Configure(config Configuration) (*BugsnagPerformance, error) {
+func Configure(config Configuration) ([]trace.TracerProviderOption, error) {
 	readEnvConfigOnce.Do(Config.loadEnv)
 	Config.update(&config)
 	err := Config.validate()
@@ -45,42 +40,58 @@ func Configure(config Configuration) (*BugsnagPerformance, error) {
 		return nil, err
 	}
 
+	otelOptions := createBugsnagOtelOptions()
+
+	return otelOptions, nil
+}
+
+func createBugsnagOtelOptions() []trace.TracerProviderOption {
 	delivery := createDelivery()
-	ctx := context.Background()
-	if Config.MainContext != nil {
-		ctx = Config.MainContext
-	}
-	probabilityManager := createProbabilityManager(ctx, delivery)
+	probabilityManager := createProbabilityManager(Config.MainContext, delivery)
 	sampler := createSampler(probabilityManager)
+
+	otelOptions := []trace.TracerProviderOption{}
 	probAttrProcessor := createProbabilityAttributeProcessor(probabilityManager)
-	processors := []trace.SpanProcessor{probAttrProcessor}
+	otelOptions = append(otelOptions, trace.WithSpanProcessor(probAttrProcessor))
 
 	// enter unmanaged mode if the OTel sampler environment variable has been set
 	// note: we assume any value means a non-default sampler will be used because
 	//       we don't control what the valid values are
 	unmanagedMode := false
-	if customSampler := os.Getenv("OTEL_TRACES_SAMPLER"); customSampler != "" {
+	if customSampler := os.Getenv("OTEL_TRACES_SAMPLER"); customSampler != "" || Config.CustomSampler != nil {
 		unmanagedMode = true
+		otelOptions = append(otelOptions, trace.WithSampler(Config.CustomSampler))
+	} else {
+		otelOptions = append(otelOptions, trace.WithSampler(sampler))
 	}
 
-	// Create an exporter only if the configured release stage is enabled
 	if Config.isReleaseStageEnabled() {
 		spanExporter := createSpanExporter(probabilityManager, sampler, delivery, unmanagedMode)
-		// Batch processor with default settings
-		bsgSpanProcessor := trace.NewBatchSpanProcessor(spanExporter)
-		processors = append(processors, bsgSpanProcessor)
+		otelOptions = append(otelOptions, trace.WithSpanProcessor(trace.NewBatchSpanProcessor(spanExporter)))
 	}
 
-	bsgResource := resource.NewWithAttributes(
-		semconv.SchemaURL,
-		semconv.DeploymentEnvironment(Config.ReleaseStage),
+	otelOptions = append(otelOptions, trace.WithResource(createBugsnagMergedResource()))
+
+	return otelOptions
+}
+
+func createBugsnagMergedResource() *resource.Resource {
+	customResource := Config.Resource
+	if customResource == nil {
+		customResource = resource.Default()
+	}
+
+	bsgResource, err := resource.Merge(
+		customResource,
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.DeploymentEnvironment(Config.ReleaseStage),
+		),
 	)
-
-	performanceItems := &BugsnagPerformance{
-		Sampler:    sampler,
-		Processors: processors,
-		Resource:   bsgResource,
+	if err != nil {
+		Config.Logger.Printf("Error while merging resource: %+v\n", err)
+		return customResource
 	}
 
-	return performanceItems, nil
+	return bsgResource
 }

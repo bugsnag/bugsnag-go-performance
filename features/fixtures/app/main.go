@@ -10,67 +10,24 @@ import (
 
 	bsgperf "github.com/bugsnag/bugsnag-go-performance"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
-var scenariosMap = map[string]func() (resourceData, bsgperf.Configuration, func()){
+var scenariosMap = map[string]func() (bsgperf.Configuration, func()){
 	"ManualTraceScenario":          ManualTraceScenario,
 	"DisabledReleaseStageScenario": DisabledReleaseStageScenario,
 	"EnvironmentConfigScenario":    EnvironmentConfigScenario,
 }
 
-type resourceData struct {
-	serviceName    string
-	serviceVersion string
-	deviceID       string
-}
-
-func configureOtel(ctx context.Context, addr string, resData resourceData, config bsgperf.Configuration) {
-	otelOptions := []trace.TracerProviderOption{}
-
+func configureOtel(ctx context.Context, addr string, config bsgperf.Configuration) {
 	config.MainContext = ctx
 	config.Endpoint = fmt.Sprintf("%v/traces", addr)
-	bsgPerformance, err := bsgperf.Configure(config)
+	bsgOptions, err := bsgperf.Configure(config)
 	if err != nil {
 		fmt.Printf("Error while creating bugsnag-go-performance: %+v\n", err)
 		return
 	}
-
-	for _, processor := range bsgPerformance.Processors {
-		otelOptions = append(otelOptions, trace.WithSpanProcessor(processor))
-	}
-
-	if bsgPerformance.Sampler != nil {
-		otelOptions = append(otelOptions, trace.WithSampler(bsgPerformance.Sampler))
-	}
-
-	// normal creation
-	traceRes, err := resource.Merge(
-		resource.Default(),
-		bsgPerformance.Resource,
-	)
-	if err != nil {
-		fmt.Printf("Error while merging resource: %+v\n", err)
-	}
-
-	// setup data from tests to be merged with the resource
-	traceRes, err = resource.Merge(
-		traceRes,
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName(resData.serviceName),
-			semconv.ServiceVersion(resData.serviceVersion),
-			semconv.DeviceID(resData.deviceID)),
-	)
-	if err != nil {
-		fmt.Printf("Error while merging resource: %+v\n", err)
-	}
-
-	otelOptions = append(otelOptions, trace.WithResource(traceRes))
-
-	tracerProvider := trace.NewTracerProvider(otelOptions...)
+	tracerProvider := trace.NewTracerProvider(bsgOptions...)
 	otel.SetTracerProvider(tracerProvider)
 }
 
@@ -99,8 +56,8 @@ func main() {
 			if command.Action == "run-scenario" {
 				prepareScenarioFunc, ok := scenariosMap[command.ScenarioName]
 				if ok {
-					resData, config, scenarioFunc := prepareScenarioFunc()
-					configureOtel(ctx, addr, resData, config)
+					config, scenarioFunc := prepareScenarioFunc()
+					configureOtel(ctx, addr, config)
 					scenarioFunc()
 				}
 			}

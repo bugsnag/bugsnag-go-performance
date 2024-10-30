@@ -22,7 +22,7 @@ func createSpans(scenarioName string) {
 	}
 }
 
-func ManualTraceScenario() (resourceData, bsgperf.Configuration, func()) {
+func ManualTraceScenario() (bsgperf.Configuration, func()) {
 	f := func() {
 		fmt.Println("[Bugsnag] ManualTraceScenario")
 		createSpans("ManualTraceScenario")
@@ -31,17 +31,12 @@ func ManualTraceScenario() (resourceData, bsgperf.Configuration, func()) {
 		APIKey:               "a35a2a72bd230ac0aa0f52715bbdc6aa",
 		EnabledReleaseStages: []string{"production", "staging"},
 		ReleaseStage:         "staging",
+		Resource:             createScenarioResource("basic app", "1.22.333", "1"),
 	}
-
-	resource := resourceData{
-		serviceName:    "basic app",
-		serviceVersion: "1.22.333",
-		deviceID:       "1",
-	}
-	return resource, config, f
+	return config, f
 }
 
-func DisabledReleaseStageScenario() (resourceData, bsgperf.Configuration, func()) {
+func DisabledReleaseStageScenario() (bsgperf.Configuration, func()) {
 	f := func() {
 		fmt.Println("[Bugsnag] ManualTraceScenario")
 		createSpans("DisabledReleaseStageScenario")
@@ -51,12 +46,7 @@ func DisabledReleaseStageScenario() (resourceData, bsgperf.Configuration, func()
 		APIKey:               "a35a2a72bd230ac0aa0f52715bbdc6aa",
 		EnabledReleaseStages: []string{"production", "staging"},
 		ReleaseStage:         "development",
+		Resource:             createScenarioResource("basic app", "1.22.333", "1"),
 	}
-
-	resource := resourceData{
-		serviceName:    "basic app",
-		serviceVersion: "1.22.333",
-		deviceID:       "1",
-	}
-	return resource, config, f
+	return config, f
 }
