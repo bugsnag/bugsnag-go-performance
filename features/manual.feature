@@ -22,9 +22,10 @@ Scenario: It runs the basic app
     | status.code            | 0           |
     | status.message         |             |
   And a span named "test span 1" contains the attributes:
-    | attribute              | type        | value |
-    | span.custom.age        | intValue    | 0     |
-    | bugsnag.sampling.p     | doubleValue | 1     |
+    | attribute                | type        | value |
+    | span.custom.age          | intValue    | 0     |
+    | bugsnag.sampling.p       | doubleValue | 1     |
+    | bugsnag.span.first_class | boolValue   | true  |
 
   And a span named "test span 2" has the following properties:
     | property               | value       |
@@ -36,9 +37,10 @@ Scenario: It runs the basic app
     | status.code            | 0           |
     | status.message         |             |
   And a span named "test span 2" contains the attributes:
-    | attribute              | type        | value |
-    | span.custom.age        | intValue    | 10    |
-    | bugsnag.sampling.p     | doubleValue | 1     |
+    | attribute                | type        | value |
+    | span.custom.age          | intValue    | 10    |
+    | bugsnag.sampling.p       | doubleValue | 1     |
+    | bugsnag.span.first_class | boolValue   | true  |
 
   And a span named "test span 3" has the following properties:
     | property               | value       |
@@ -50,9 +52,10 @@ Scenario: It runs the basic app
     | status.code            | 0           |
     | status.message         |             |
   And a span named "test span 3" contains the attributes:
-    | attribute              | type        | value |
-    | span.custom.age        | intValue    | 20    |
-    | bugsnag.sampling.p     | doubleValue | 1     |
+    | attribute                | type        | value |
+    | span.custom.age          | intValue    | 20    |
+    | bugsnag.sampling.p       | doubleValue | 1     |
+    | bugsnag.span.first_class | boolValue   | true  |
 
   And a span named "test span 4" has the following properties:
     | property               | value       |
@@ -64,9 +67,10 @@ Scenario: It runs the basic app
     | status.code            | 0           |
     | status.message         |             |
   And a span named "test span 4" contains the attributes:
-    | attribute              | type        | value |
-    | span.custom.age        | intValue    | 30    |
-    | bugsnag.sampling.p     | doubleValue | 1     |
+    | attribute                | type        | value |
+    | span.custom.age          | intValue    | 30    |
+    | bugsnag.sampling.p       | doubleValue | 1     |
+    | bugsnag.span.first_class | boolValue   | true  |
 
   And a span named "test span 5" has the following properties:
     | property               | value       |
@@ -78,9 +82,10 @@ Scenario: It runs the basic app
     | status.code            | 0           |
     | status.message         |             |
   And a span named "test span 5" contains the attributes:
-    | attribute              | type        | value |
-    | span.custom.age        | intValue    | 40    |
-    | bugsnag.sampling.p     | doubleValue | 1     |
+    | attribute                | type        | value |
+    | span.custom.age          | intValue    | 40    |
+    | bugsnag.sampling.p       | doubleValue | 1     |
+    | bugsnag.span.first_class | boolValue   | true  |
 
 Scenario: It does not export spans when the release stage is disabled
   When I start the service "app"
