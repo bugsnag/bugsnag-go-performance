@@ -27,7 +27,7 @@ Configure the tests to be run in the following way:
 - Determine the Go version to be tested using the environment variable `GO_VERSION`, e.g. `GO_VERSION=1.19`
 - Determine the Open Telemetry SDK version using the environment variable `OTEL_VERSION`, e.g. `OTEL_VERSION=1.20`
 
-Here is a list of compatible Go x OTeL versions (OTeL version 1.22 is skipped as it has some incompatibilities with semconv package):
+Here is a list of compatible Go x OTeL versions:
 * For Go 1.19 - OTeL 1.17 - 1.24
 * For Go 1.20 - OTeL 1.17 - 1.24
 * For Go 1.21 - OTeL 1.17 - 1.29

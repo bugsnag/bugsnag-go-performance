@@ -3,18 +3,28 @@ package main
 import (
 	"fmt"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
 func createScenarioResource(srvName, srvVer, deviceID string) *resource.Resource {
+	attr := []attribute.KeyValue{
+		{
+			Key:   attribute.Key("device.id"),
+			Value: attribute.StringValue(deviceID),
+		},
+		{
+			Key:   attribute.Key("service.name"),
+			Value: attribute.StringValue(srvName),
+		},
+		{
+			Key:   attribute.Key("service.version"),
+			Value: attribute.StringValue(srvVer),
+		},
+	}
 	traceRes, err := resource.Merge(
 		resource.Default(),
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName(srvName),
-			semconv.ServiceVersion(srvVer),
-			semconv.DeviceID(deviceID)),
+		resource.NewSchemaless(attr...),
 	)
 	if err != nil {
 		fmt.Printf("Error while merging resource: %+v\n", err)

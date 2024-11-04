@@ -43,7 +43,7 @@ type Configuration struct {
 	// If not provided, the default sampler will be used
 	CustomSampler trace.Sampler
 
-	// Resource to be merged with bugsnag performance resource
+	// Resource to be merged with BugSnag resource data
 	// If not provided, the default resource will be used
 	Resource *resource.Resource
 

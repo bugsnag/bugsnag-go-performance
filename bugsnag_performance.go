@@ -7,9 +7,9 @@ import (
 	"os"
 	"sync"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
 // Version defines the version of this Bugsnag performance module
@@ -81,12 +81,10 @@ func createBugsnagMergedResource() *resource.Resource {
 		customResource = resource.Default()
 	}
 
+	attr := []attribute.KeyValue{{Key: "deployment.environment", Value: attribute.StringValue(Config.ReleaseStage)}}
 	bsgResource, err := resource.Merge(
 		customResource,
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.DeploymentEnvironment(Config.ReleaseStage),
-		),
+		resource.NewSchemaless(attr...),
 	)
 	if err != nil {
 		Config.Logger.Printf("Error while merging resource: %+v\n", err)
