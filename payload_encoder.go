@@ -1,6 +1,7 @@
 package bugsnagperformance
 
 import (
+	"fmt"
 	"strconv"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -142,10 +143,10 @@ func (enc *payloadEncoder) attributeValueToMap(val attribute.Value) map[string]i
 
 	switch val.Type() {
 	case attribute.INT64:
-		singleVal["intValue"] = val.AsInt64()
+		singleVal["intValue"] = fmt.Sprintf("%d", val.AsInt64())
 	case attribute.INT64SLICE:
 		for _, arrayItem := range val.AsInt64Slice() {
-			arrayValues = append(arrayValues, map[string]interface{}{"intValue": arrayItem})
+			arrayValues = append(arrayValues, map[string]interface{}{"intValue": fmt.Sprintf("%d", arrayItem)})
 		}
 	case attribute.BOOL:
 		singleVal["boolValue"] = val.AsBool()

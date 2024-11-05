@@ -49,6 +49,8 @@ func (sp *SpanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlyS
 	filteredSpans := []managedSpan{}
 	headers := map[string]string{}
 
+	// TODO check unmanaged mode - compare sampler pointers
+
 	if !sp.unmanagedMode {
 		// resample spans
 		for _, span := range spans {

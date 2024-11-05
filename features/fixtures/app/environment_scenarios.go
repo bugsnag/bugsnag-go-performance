@@ -6,15 +6,15 @@ import (
 	bsgperf "github.com/bugsnag/bugsnag-go-performance"
 )
 
-func EnvironmentConfigScenario() (resourceData, bsgperf.Configuration, func()) {
+func EnvironmentConfigScenario() (bsgperf.Configuration, func()) {
 	f := func() {
 		fmt.Println("[Bugsnag] EnvironmentConfigScenario")
 		createSpans("EnvironmentConfigScenario")
 	}
-	resource := resourceData{
-		serviceName:    "basic app",
-		serviceVersion: "1.2.3",
-		deviceID:       "1",
+	config := bsgperf.Configuration{
+		AppVersion: "1.22.333",
+		Resource:   createScenarioResource("basic app", "1"),
 	}
-	return resource, bsgperf.Configuration{}, f
+
+	return config, f
 }
