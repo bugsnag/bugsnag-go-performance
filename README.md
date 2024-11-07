@@ -12,7 +12,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/bugsnag/bugsnag-go.svg)](https://pkg.go.dev/github.com/bugsnag/bugsnag-go-performance)
 [![Build status](https://github.com/bugsnag/bugsnag-go-performance/actions/workflows/test-package.yml/badge.svg?branch=master)](https://buildkite.com/bugsnag/bugsnag-go-performance)
 
-Convenience SDK for using the [Ruby Otel SDK](https://github.com/open-telemetry/opentelemetry-ruby) with BugSnag.
+Convenience SDK for using the [Go Otel SDK](https://github.com/open-telemetry/opentelemetry-go) with BugSnag.
 
 ## Features
 
@@ -31,4 +31,4 @@ For integration instructions, see our online docs: [docs.bugsnag.com/performance
 
 ## License
 
-The BugSnag Ruby performance SDK is free software released under the MIT License. See [LICENSE.txt](LICENSE.txt) for details.
+The BugSnag Go Performance SDK is free software released under the MIT License. See [LICENSE.txt](LICENSE.txt) for details.
