@@ -84,7 +84,7 @@ func createDelivery() *delivery {
 func (d *delivery) send(headers map[string]string, payload []byte) (*http.Response, error) {
 	newHeaders := map[string]string{}
 
-	// TODO - add this back when pipeline is prepared to handle it
+	// TODO - can be restored after https://smartbear.atlassian.net/browse/PIPE-7498
 	//newHeaders["Bugsnag-Sent-At"] = time.Now().Format(time.RFC3339)
 
 	// merge constant headers with the headers passed in

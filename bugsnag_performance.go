@@ -91,11 +91,11 @@ func createBugsnagMergedResource() *resource.Resource {
 			Value: attribute.StringValue(Config.AppVersion),
 		},
 		{
-			Key:   bugsnagTelemetrySDKName,
+			Key:   bugsnagSDKNameAttribute,
 			Value: attribute.StringValue(sdkName),
 		},
 		{
-			Key:   bugsnagTelemetrySDKVer,
+			Key:   bugsnagSDKVersionAttribute,
 			Value: attribute.StringValue(Version),
 		},
 	}

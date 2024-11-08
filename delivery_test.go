@@ -80,7 +80,7 @@ func TestHeadersPresentAtSend(t *testing.T) {
 		if r.Header.Get("key1") != "value1" {
 			t.Errorf("Expected header key1 to be value1, got %s", r.Header.Get("key1"))
 		}
-		// TODO - add this back when pipeline is ready
+		// TODO - can be restored after https://smartbear.atlassian.net/browse/PIPE-7498
 		//if r.Header.Get("Bugsnag-Sent-At") == "" {
 		//	t.Errorf("Expected header Bugsnag-Sent-At to be present")
 		//}
