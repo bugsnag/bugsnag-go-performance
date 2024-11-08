@@ -89,7 +89,7 @@ func TestHeadersPresentAtSend(t *testing.T) {
 		if r.Header.Get("Content-Type") != "application/json" {
 			t.Errorf("Expected header Content-Type to be application/json, got %s", r.Header.Get("Content-Type"))
 		}
-		if r.Header.Get("User-Agent") != fmt.Sprintf("Go Bugsnag Performance SDK v%v", Version) {
+		if r.Header.Get("User-Agent") != fmt.Sprintf("%v v%v", sdkName, Version) {
 			t.Errorf("Expected header User-Agent to match current version, got %s", r.Header.Get("User-Agent"))
 		}
 	}))

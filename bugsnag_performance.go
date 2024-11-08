@@ -83,19 +83,19 @@ func createBugsnagMergedResource() *resource.Resource {
 
 	attr := []attribute.KeyValue{
 		{
-			Key:   "deployment.environment",
+			Key:   deploymentEnvAttribute,
 			Value: attribute.StringValue(Config.ReleaseStage),
 		},
 		{
-			Key:   "service.version",
+			Key:   serviceVersionAttribute,
 			Value: attribute.StringValue(Config.AppVersion),
 		},
 		{
-			Key:   "bugsnag.telemetry.sdk.name",
-			Value: attribute.StringValue("Go Bugsnag Performance SDK"),
+			Key:   bugsnagTelemetrySDKName,
+			Value: attribute.StringValue(sdkName),
 		},
 		{
-			Key:   "bugsnag.telemetry.sdk.version",
+			Key:   bugsnagTelemetrySDKVer,
 			Value: attribute.StringValue(Version),
 		},
 	}
