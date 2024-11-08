@@ -89,7 +89,16 @@ func createBugsnagMergedResource() *resource.Resource {
 		{
 			Key:   "service.version",
 			Value: attribute.StringValue(Config.AppVersion),
-		}}
+		},
+		{
+			Key:   "bugsnag.telemetry.sdk.name",
+			Value: attribute.StringValue("Go Bugsnag Performance SDK"),
+		},
+		{
+			Key:   "bugsnag.telemetry.sdk.version",
+			Value: attribute.StringValue(Version),
+		},
+	}
 	bsgResource, err := resource.Merge(
 		customResource,
 		resource.NewSchemaless(attr...),
