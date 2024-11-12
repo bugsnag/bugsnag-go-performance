@@ -80,16 +80,17 @@ func TestHeadersPresentAtSend(t *testing.T) {
 		if r.Header.Get("key1") != "value1" {
 			t.Errorf("Expected header key1 to be value1, got %s", r.Header.Get("key1"))
 		}
-		if r.Header.Get("Bugsnag-Sent-At") == "" {
-			t.Errorf("Expected header Bugsnag-Sent-At to be present")
-		}
+		// TODO - can be restored after https://smartbear.atlassian.net/browse/PIPE-7498
+		//if r.Header.Get("Bugsnag-Sent-At") == "" {
+		//	t.Errorf("Expected header Bugsnag-Sent-At to be present")
+		//}
 		if r.Header.Get("Bugsnag-Api-Key") != testAPIKey {
 			t.Errorf("Expected header Bugsnag-Api-Key to be %s, got %s", testAPIKey, r.Header.Get("Bugsnag-Api-Key"))
 		}
 		if r.Header.Get("Content-Type") != "application/json" {
 			t.Errorf("Expected header Content-Type to be application/json, got %s", r.Header.Get("Content-Type"))
 		}
-		if r.Header.Get("User-Agent") != fmt.Sprintf("Go Bugsnag Performance SDK v%v", Version) {
+		if r.Header.Get("User-Agent") != fmt.Sprintf("%v v%v", sdkName, Version) {
 			t.Errorf("Expected header User-Agent to match current version, got %s", r.Header.Get("User-Agent"))
 		}
 	}))

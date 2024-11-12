@@ -83,13 +83,22 @@ func createBugsnagMergedResource() *resource.Resource {
 
 	attr := []attribute.KeyValue{
 		{
-			Key:   "deployment.environment",
+			Key:   deploymentEnvAttribute,
 			Value: attribute.StringValue(Config.ReleaseStage),
 		},
 		{
-			Key:   "service.version",
+			Key:   serviceVersionAttribute,
 			Value: attribute.StringValue(Config.AppVersion),
-		}}
+		},
+		{
+			Key:   bugsnagSDKNameAttribute,
+			Value: attribute.StringValue(sdkName),
+		},
+		{
+			Key:   bugsnagSDKVersionAttribute,
+			Value: attribute.StringValue(Version),
+		},
+	}
 	bsgResource, err := resource.Merge(
 		customResource,
 		resource.NewSchemaless(attr...),

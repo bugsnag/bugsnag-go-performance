@@ -72,7 +72,7 @@ func createDelivery() *delivery {
 	headers := map[string]string{
 		"Bugsnag-Api-Key": Config.APIKey,
 		"Content-Type":    "application/json",
-		"User-Agent":      fmt.Sprintf("Go Bugsnag Performance SDK v%v", Version),
+		"User-Agent":      fmt.Sprintf("%v v%v", sdkName, Version),
 	}
 
 	return &delivery{
@@ -83,7 +83,10 @@ func createDelivery() *delivery {
 
 func (d *delivery) send(headers map[string]string, payload []byte) (*http.Response, error) {
 	newHeaders := map[string]string{}
-	newHeaders["Bugsnag-Sent-At"] = time.Now().Format(time.RFC3339)
+
+	// TODO - can be restored after https://smartbear.atlassian.net/browse/PIPE-7498
+	//newHeaders["Bugsnag-Sent-At"] = time.Now().Format(time.RFC3339)
+
 	// merge constant headers with the headers passed in
 	for k, v := range headers {
 		newHeaders[k] = v
