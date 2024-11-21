@@ -87,6 +87,10 @@ func createBugsnagMergedResource() *resource.Resource {
 			Value: attribute.StringValue(Config.ReleaseStage),
 		},
 		{
+			Key:   serviceNameAttribute,
+			Value: attribute.StringValue(Config.ServiceName),
+		},
+		{
 			Key:   serviceVersionAttribute,
 			Value: attribute.StringValue(Config.AppVersion),
 		},
