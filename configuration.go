@@ -116,10 +116,6 @@ func (config *Configuration) validate() error {
 		config.Endpoint = defaultEndpoint
 	}
 
-	if config.ServiceName == "" {
-		config.ServiceName = "unknown_service"
-	}
-
 	return nil
 }
 
@@ -133,8 +129,6 @@ func (config *Configuration) loadEnv() {
 	}
 
 	if serviceName := os.Getenv("BUGSNAG_PERFORMANCE_SERVICE_NAME"); serviceName != "" {
-		envConfig.ServiceName = serviceName
-	} else if serviceName := os.Getenv("OTEL_SERVICE_NAME"); serviceName != "" {
 		envConfig.ServiceName = serviceName
 	}
 

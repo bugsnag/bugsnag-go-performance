@@ -87,10 +87,6 @@ func createBugsnagMergedResource() *resource.Resource {
 			Value: attribute.StringValue(Config.ReleaseStage),
 		},
 		{
-			Key:   serviceNameAttribute,
-			Value: attribute.StringValue(Config.ServiceName),
-		},
-		{
 			Key:   serviceVersionAttribute,
 			Value: attribute.StringValue(Config.AppVersion),
 		},
@@ -103,6 +99,10 @@ func createBugsnagMergedResource() *resource.Resource {
 			Value: attribute.StringValue(Version),
 		},
 	}
+	if Config.ServiceName != "" {
+		attr = append(attr, attribute.String(serviceNameAttribute, Config.ServiceName))
+	}
+
 	bsgResource, err := resource.Merge(
 		customResource,
 		resource.NewSchemaless(attr...),
