@@ -35,7 +35,23 @@ func ManualTraceScenario() (bsgperf.Configuration, func()) {
 		EnabledReleaseStages: []string{"production", "staging"},
 		ReleaseStage:         "staging",
 		AppVersion:           "1.22.333",
-		Resource:             createScenarioResource("basic app", "1"),
+		Resource:             createScenarioResource("1"),
+		ServiceName:          "basic app",
+	}
+	return config, f
+}
+
+func ServiceNameScenario() (bsgperf.Configuration, func()) {
+	f := func() {
+		fmt.Println("[Bugsnag] ServiceNameScenario")
+		createSpans("ServiceNameScenario")
+	}
+	config := bsgperf.Configuration{
+		APIKey:               "a35a2a72bd230ac0aa0f52715bbdc6aa",
+		EnabledReleaseStages: []string{"production", "staging"},
+		ReleaseStage:         "staging",
+		AppVersion:           "1.22.333",
+		Resource:             createScenarioResource("1"),
 	}
 	return config, f
 }
@@ -51,7 +67,8 @@ func DisabledReleaseStageScenario() (bsgperf.Configuration, func()) {
 		EnabledReleaseStages: []string{"production", "staging"},
 		ReleaseStage:         "development",
 		AppVersion:           "1.22.333",
-		Resource:             createScenarioResource("basic app", "1"),
+		Resource:             createScenarioResource("1"),
+		ServiceName:          "basic app",
 	}
 	return config, f
 }

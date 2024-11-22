@@ -7,15 +7,11 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 )
 
-func createScenarioResource(srvName, deviceID string) *resource.Resource {
+func createScenarioResource(deviceID string) *resource.Resource {
 	attr := []attribute.KeyValue{
 		{
 			Key:   attribute.Key("device.id"),
 			Value: attribute.StringValue(deviceID),
-		},
-		{
-			Key:   attribute.Key("service.name"),
-			Value: attribute.StringValue(srvName),
 		},
 	}
 	traceRes, err := resource.Merge(

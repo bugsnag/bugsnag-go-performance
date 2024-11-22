@@ -10,6 +10,7 @@ const (
 	fetcherRefreshInterval     = 24 * time.Hour
 	fetcherRequestBody         = `{"resourceSpans": []}`
 	deploymentEnvAttribute     = "deployment.environment"
+	serviceNameAttribute       = "service.name"
 	serviceVersionAttribute    = "service.version"
 	bugsnagSDKNameAttribute    = "bugsnag.telemetry.sdk.name"
 	bugsnagSDKVersionAttribute = "bugsnag.telemetry.sdk.version"

@@ -47,6 +47,12 @@ type Configuration struct {
 	// If not provided, the default resource will be used
 	Resource *resource.Resource
 
+	// Sets the value of the service.name resource attribute
+	// We also recommend you set it to the same name as your
+	// BugSnag project name to identify spans on the dashboard
+	// if Distributed Tracing is used.
+	ServiceName string
+
 	// Logger to use for debug messages
 	Logger *log.Logger
 }
@@ -75,6 +81,9 @@ func (config *Configuration) update(other *Configuration) *Configuration {
 	}
 	if other.Resource != nil {
 		config.Resource = other.Resource
+	}
+	if other.ServiceName != "" {
+		config.ServiceName = other.ServiceName
 	}
 	if other.Logger != nil {
 		config.Logger = other.Logger
@@ -119,8 +128,18 @@ func (config *Configuration) loadEnv() {
 		envConfig.APIKey = apiKey
 	}
 
-	if appVersion := os.Getenv("BUGSNAG_APP_VERSION"); appVersion != "" {
+	if serviceName := os.Getenv("BUGSNAG_PERFORMANCE_SERVICE_NAME"); serviceName != "" {
+		envConfig.ServiceName = serviceName
+	}
+
+	if appVersion := os.Getenv("BUGSNAG_PERFORMANCE_APP_VERSION"); appVersion != "" {
 		envConfig.AppVersion = appVersion
+	} else if appVersion := os.Getenv("BUGSNAG_APP_VERSION"); appVersion != "" {
+		envConfig.AppVersion = appVersion
+	}
+
+	if endpoint := os.Getenv("BUGSNAG_PERFORMANCE_ENDPOINT"); endpoint != "" {
+		envConfig.Endpoint = endpoint
 	}
 
 	if stage := os.Getenv("BUGSNAG_PERFORMANCE_RELEASE_STAGE"); stage != "" {

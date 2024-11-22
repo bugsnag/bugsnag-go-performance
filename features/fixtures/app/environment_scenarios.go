@@ -12,8 +12,7 @@ func EnvironmentConfigScenario() (bsgperf.Configuration, func()) {
 		createSpans("EnvironmentConfigScenario")
 	}
 	config := bsgperf.Configuration{
-		AppVersion: "1.22.333",
-		Resource:   createScenarioResource("basic app", "1"),
+		Resource: createScenarioResource("1"),
 	}
 
 	return config, f

@@ -87,6 +87,19 @@ Scenario: It runs the basic app
     | bugsnag.sampling.p       | doubleValue | 1     |
     | bugsnag.span.first_class | boolValue   | true  |
 
+Scenario: It picks up default service name from OTEL
+  When I start the service "app"
+  Then I run "ServiceNameScenario"
+  And I wait to receive a trace
+  And the trace payload field "resourceSpans.0.resource" string attribute "service.name" equals "unknown_service:app"
+
+Scenario: It picks up service name from OTEL env var
+  Given I set environment variable "OTEL_SERVICE_NAME" to "mysrvname"
+  When I start the service "app"
+  Then I run "ServiceNameScenario"
+  And I wait to receive a trace
+  And the trace payload field "resourceSpans.0.resource" string attribute "service.name" equals "mysrvname"
+
 Scenario: It does not export spans when the release stage is disabled
   When I start the service "app"
   Then I run "DisabledReleaseStageScenario"

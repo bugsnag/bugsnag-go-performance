@@ -17,6 +17,7 @@ var scenariosMap = map[string]func() (bsgperf.Configuration, func()){
 	"ManualTraceScenario":          ManualTraceScenario,
 	"DisabledReleaseStageScenario": DisabledReleaseStageScenario,
 	"EnvironmentConfigScenario":    EnvironmentConfigScenario,
+	"ServiceNameScenario":          ServiceNameScenario,
 }
 
 func configureOtel(ctx context.Context, addr string, config bsgperf.Configuration) {
