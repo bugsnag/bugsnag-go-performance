@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -53,6 +54,11 @@ type Configuration struct {
 	// if Distributed Tracing is used.
 	ServiceName string
 
+	// The http Transport to use, defaults to the default http Transport. This
+	// can be configured if you are in an environment
+	// that has stringent conditions on making http requests.
+	Transport http.RoundTripper
+
 	// Logger to use for debug messages
 	Logger *log.Logger
 }
@@ -84,6 +90,9 @@ func (config *Configuration) update(other *Configuration) *Configuration {
 	}
 	if other.ServiceName != "" {
 		config.ServiceName = other.ServiceName
+	}
+	if other.Transport != nil {
+		config.Transport = other.Transport
 	}
 	if other.Logger != nil {
 		config.Logger = other.Logger
