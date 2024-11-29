@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"sync"
 
@@ -26,6 +27,7 @@ func init() {
 		ReleaseStage: "production",
 		Logger:       log.New(os.Stdout, "[BugsnagPerformance] ", log.LstdFlags),
 		MainContext:  context.TODO(),
+		Transport:    http.DefaultTransport,
 	}
 }
 

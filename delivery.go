@@ -47,7 +47,8 @@ type delivery struct {
 
 func (d *delivery) sendPayload(headers map[string]string, payload []byte) (*http.Response, error) {
 	client := http.Client{
-		Timeout: 10 * time.Second,
+		Timeout:   10 * time.Second,
+		Transport: Config.Transport,
 	}
 
 	body := bytes.NewBuffer(payload)
