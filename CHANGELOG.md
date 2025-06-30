@@ -5,7 +5,7 @@ Changelog
 
 ### Enhancements
 
-* Set default endpoints based on API key [#x](x)
+* Set default endpoints based on API key [#29](https://github.com/bugsnag/bugsnag-go-performance/pull/29)
 
 ## 1.0.0 (2024-12-09)
 
