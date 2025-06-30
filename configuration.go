@@ -12,6 +12,12 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
+const (
+	DEFAULT_ENDPOINT = "https://%+v.otlp.bugsnag.com/v1/traces"
+	HUB_ENDPOINT     = "https://%+v.otlp.insighthub.smartbear.com/v1/traces"
+	HUB_PREFIX       = "00000"
+)
+
 type Configuration struct {
 	// Your Bugsnag API key, e.g. "c9d60ae4c7e70c4b6c4ebd3e8056d2b8". You can
 	// find this by clicking Settings on https://bugsnag.com/.
@@ -121,10 +127,9 @@ func (config *Configuration) validate(other *Configuration) error {
 	}
 
 	if config.Endpoint == "" || other.Endpoint == "" {
-		defaultEndpoint := fmt.Sprintf("https://%+v.otlp.bugsnag.com/v1/traces", config.APIKey)
-		hubEndpoint := fmt.Sprintf("https://%+v.otlp.insighthub.smartbear.com/v1/traces", config.APIKey)
-		hubPrefix := "00000"
-		if strings.HasPrefix(config.APIKey, hubPrefix) {
+		defaultEndpoint := fmt.Sprintf(DEFAULT_ENDPOINT, config.APIKey)
+		hubEndpoint := fmt.Sprintf(HUB_ENDPOINT, config.APIKey)
+		if strings.HasPrefix(config.APIKey, HUB_PREFIX) {
 			config.Endpoint = hubEndpoint
 		} else {
 			config.Endpoint = defaultEndpoint
