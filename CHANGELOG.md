@@ -1,6 +1,12 @@
 Changelog
 =========
 
+## TBD
+
+### Enhancements
+
+* Set default endpoints based on API key [#x](x)
+
 ## 1.0.0 (2024-12-09)
 
 ### Enhancements

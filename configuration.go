@@ -115,14 +115,20 @@ func (config *Configuration) isReleaseStageEnabled() bool {
 	return false
 }
 
-func (config *Configuration) validate() error {
+func (config *Configuration) validate(other *Configuration) error {
 	if config.APIKey == "" {
 		return fmt.Errorf("no Bugsnag API Key set")
 	}
 
-	if config.Endpoint == "" {
+	if config.Endpoint == "" || other.Endpoint == "" {
 		defaultEndpoint := fmt.Sprintf("https://%+v.otlp.bugsnag.com/v1/traces", config.APIKey)
-		config.Endpoint = defaultEndpoint
+		hubEndpoint := fmt.Sprintf("https://%+v.otlp.insighthub.smartbear.com/v1/traces", config.APIKey)
+		hubPrefix := "00000"
+		if strings.HasPrefix(config.APIKey, hubPrefix) {
+			config.Endpoint = hubEndpoint
+		} else {
+			config.Endpoint = defaultEndpoint
+		}
 	}
 
 	return nil

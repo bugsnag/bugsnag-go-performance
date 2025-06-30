@@ -37,7 +37,7 @@ func init() {
 func Configure(config Configuration) ([]trace.TracerProviderOption, error) {
 	readEnvConfigOnce.Do(Config.loadEnv)
 	Config.update(&config)
-	err := Config.validate()
+	err := Config.validate(&config)
 	if err != nil {
 		return nil, err
 	}
