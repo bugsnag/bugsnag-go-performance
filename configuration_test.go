@@ -71,10 +71,92 @@ func TestDefaultValues(t *testing.T) {
 	}
 }
 
+func TestDefaultHubValues(t *testing.T) {
+	resetEnv()
+	testConfig := Configuration{
+		APIKey:               "00000ffffeeee11112222333344445555",
+		Endpoint:             "https://00000ffffeeee11112222333344445555.otlp.insighthub.smartbear.com/v1/traces",
+		AppVersion:           "",
+		ReleaseStage:         "production",
+		EnabledReleaseStages: []string{},
+		Logger:               nil}
+
+	_, err := Configure(Configuration{
+		APIKey: "00000ffffeeee11112222333344445555",
+	})
+	if err != nil {
+		t.Error("should not return error")
+	}
+	if !configsEqual(&Config, &testConfig) {
+		t.Errorf("Config is: %+v, testConfig is: %+v\n", Config, testConfig)
+	}
+}
+
+func TestSecondConfigShouldSetHubEndpoint(t *testing.T) {
+	resetEnv()
+	testConfig := Configuration{
+		APIKey:               "aaa",
+		Endpoint:             "https://aaa.otlp.bugsnag.com/v1/traces",
+		AppVersion:           "",
+		ReleaseStage:         "production",
+		EnabledReleaseStages: []string{},
+		Logger:               nil}
+
+	testHubConfig := Configuration{
+		APIKey:               "00000ffffeeee11112222333344445555",
+		Endpoint:             "https://00000ffffeeee11112222333344445555.otlp.insighthub.smartbear.com/v1/traces",
+		AppVersion:           "",
+		ReleaseStage:         "production",
+		EnabledReleaseStages: []string{},
+		Logger:               nil}
+
+	// First configure with default values
+	_, err := Configure(Configuration{
+		APIKey: "aaa",
+	})
+	if err != nil {
+		t.Error("should not return error")
+	}
+	if !configsEqual(&Config, &testConfig) {
+		t.Errorf("Config is: %+v, testConfig is: %+v\n", Config, testConfig)
+	}
+
+	// Then configure with hub values
+	// This should overwrite the endpoint and API key
+	_, err = Configure(Configuration{
+		APIKey: "00000ffffeeee11112222333344445555",
+	})
+	if err != nil {
+		t.Error("should not return error")
+	}
+	if !configsEqual(&Config, &testHubConfig) {
+		t.Errorf("Config is: %+v, testHubConfig is: %+v\n", Config, testHubConfig)
+	}
+}
+
 func TestConfigureOverwriteDefault(t *testing.T) {
 	resetEnv()
 	testConfig := Configuration{
 		APIKey:               "bbb",
+		Endpoint:             "myendpoint",
+		AppVersion:           "123",
+		ReleaseStage:         "dev",
+		EnabledReleaseStages: []string{"dev"},
+		Logger:               nil}
+
+	_, err := Configure(testConfig)
+	if err != nil {
+		t.Error("should not return error")
+	}
+	if !configsEqual(&Config, &testConfig) {
+		t.Error()
+	}
+}
+
+func TestConfigureHubOverwriteDefault(t *testing.T) {
+	resetEnv()
+	testConfig := Configuration{
+		APIKey:               "00000ffffeeee11112222333344445555",
 		Endpoint:             "myendpoint",
 		AppVersion:           "123",
 		ReleaseStage:         "dev",
