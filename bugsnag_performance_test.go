@@ -12,5 +12,6 @@ func resetEnv() {
 		ReleaseStage: "production",
 		Logger:       log.New(os.Stdout, "[BugsnagPerformance] ", log.LstdFlags),
 		MainContext:  context.TODO(),
+		Endpoint:     "",
 	}
 }
