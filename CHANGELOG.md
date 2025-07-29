@@ -1,6 +1,12 @@
 Changelog
 =========
 
+## TBD
+
+### Bug fixes
+
+* Handle endpoint being set only in env var [#32](https://github.com/bugsnag/bugsnag-go-performance/pull/32)
+
 ## 1.1.0 (2025-07-10)
 
 ### Enhancements
