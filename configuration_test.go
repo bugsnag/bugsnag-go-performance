@@ -92,48 +92,6 @@ func TestDefaultHubValues(t *testing.T) {
 	}
 }
 
-func TestSecondConfigShouldSetHubEndpoint(t *testing.T) {
-	resetEnv()
-	testConfig := Configuration{
-		APIKey:               "aaa",
-		Endpoint:             "https://aaa.otlp.bugsnag.com/v1/traces",
-		AppVersion:           "",
-		ReleaseStage:         "production",
-		EnabledReleaseStages: []string{},
-		Logger:               nil}
-
-	testHubConfig := Configuration{
-		APIKey:               "00000ffffeeee11112222333344445555",
-		Endpoint:             "https://00000ffffeeee11112222333344445555.otlp.insighthub.smartbear.com/v1/traces",
-		AppVersion:           "",
-		ReleaseStage:         "production",
-		EnabledReleaseStages: []string{},
-		Logger:               nil}
-
-	// First configure with default values
-	_, err := Configure(Configuration{
-		APIKey: "aaa",
-	})
-	if err != nil {
-		t.Error("should not return error")
-	}
-	if !configsEqual(&Config, &testConfig) {
-		t.Errorf("Config is: %+v, testConfig is: %+v\n", Config, testConfig)
-	}
-
-	// Then configure with hub values
-	// This should overwrite the endpoint and API key
-	_, err = Configure(Configuration{
-		APIKey: "00000ffffeeee11112222333344445555",
-	})
-	if err != nil {
-		t.Error("should not return error")
-	}
-	if !configsEqual(&Config, &testHubConfig) {
-		t.Errorf("Config is: %+v, testHubConfig is: %+v\n", Config, testHubConfig)
-	}
-}
-
 func TestConfigureOverwriteDefault(t *testing.T) {
 	resetEnv()
 	testConfig := Configuration{
@@ -257,6 +215,63 @@ func TestConfigureNotifierEnv(t *testing.T) {
 	if !configsEqual(&Config, &testConfig) {
 		t.Errorf("Config is: %+v, testconfig is %+v\n", Config, testConfig)
 	}
+}
+
+func TestEndpointFromEnvironment(t *testing.T) {
+	customEndpoint := "https://endpoint.custom.com"
+	hubAPIKey := "00000abcdef0123456789abcdef012345"
+	setUp := func() {
+		os.Setenv("BUGSNAG_PERFORMANCE_ENDPOINT", customEndpoint)
+		os.Setenv("BUGSNAG_API_KEY", hubAPIKey)
+	}
+
+	t.Run("Should not override endpoint set by environment variable", func(st *testing.T) {
+		resetEnv()
+		setUp()
+
+		testConfig := Configuration{
+			Endpoint:     customEndpoint,
+			APIKey:       hubAPIKey,
+			ReleaseStage: "production",
+		}
+
+		// Has to be called manually, sync.Once already ran
+		Config.loadEnv()
+		_, err := Configure(Configuration{})
+		if err != nil {
+			t.Error("should not return error")
+		}
+		if !configsEqual(&Config, &testConfig) {
+			t.Errorf("Config is: %+v, testconfig is %+v\n", Config, testConfig)
+		}
+	})
+
+	t.Run("Should override endpoints set by environment variable with custom endpoint in code", func(st *testing.T) {
+		resetEnv()
+		setUp()
+		c := &Configuration{}
+		c.loadEnv()
+
+		newCustomEndpoint := "https://test.endpoint.com"
+		testConfig := Configuration{
+			Endpoint:     newCustomEndpoint,
+			APIKey:       hubAPIKey,
+			ReleaseStage: "production",
+		}
+
+		// Has to be called manually, sync.Once already ran
+		Config.loadEnv()
+		_, err := Configure(Configuration{
+			Endpoint: newCustomEndpoint,
+		})
+		if err != nil {
+			t.Error("should not return error")
+		}
+		if !configsEqual(&Config, &testConfig) {
+			t.Errorf("Config is: %+v, testconfig is %+v\n", Config, testConfig)
+		}
+	})
+
 }
 
 func configsEqual(first, second *Configuration) bool {

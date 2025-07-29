@@ -126,7 +126,7 @@ func (config *Configuration) validate(other *Configuration) error {
 		return fmt.Errorf("no Bugsnag API Key set")
 	}
 
-	if config.Endpoint == "" || other.Endpoint == "" {
+	if config.Endpoint == "" && other.Endpoint == "" {
 		defaultEndpoint := fmt.Sprintf(DEFAULT_ENDPOINT, config.APIKey)
 		hubEndpoint := fmt.Sprintf(HUB_ENDPOINT, config.APIKey)
 		if strings.HasPrefix(config.APIKey, HUB_PREFIX) {
