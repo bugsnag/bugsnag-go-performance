@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	DEFAULT_ENDPOINT = "https://%+v.otlp.bugsnag.com/v1/traces"
-	HUB_ENDPOINT     = "https://%+v.otlp.bugsnag.smartbear.com/v1/traces"
-	HUB_PREFIX       = "00000"
+	DEFAULT_ENDPOINT          = "https://%+v.otlp.bugsnag.com/v1/traces"
+	SECONDARY_ENDPOINT        = "https://%+v.otlp.bugsnag.smartbear.com/v1/traces"
+	SECONDARY_ENDPOINT_PREFIX = "00000"
 )
 
 type Configuration struct {
@@ -128,9 +128,9 @@ func (config *Configuration) validate(other *Configuration) error {
 
 	if config.Endpoint == "" && other.Endpoint == "" {
 		defaultEndpoint := fmt.Sprintf(DEFAULT_ENDPOINT, config.APIKey)
-		hubEndpoint := fmt.Sprintf(HUB_ENDPOINT, config.APIKey)
-		if strings.HasPrefix(config.APIKey, HUB_PREFIX) {
-			config.Endpoint = hubEndpoint
+		secondaryEndpoint := fmt.Sprintf(SECONDARY_ENDPOINT, config.APIKey)
+		if strings.HasPrefix(config.APIKey, SECONDARY_ENDPOINT_PREFIX) {
+			config.Endpoint = secondaryEndpoint
 		} else {
 			config.Endpoint = defaultEndpoint
 		}
