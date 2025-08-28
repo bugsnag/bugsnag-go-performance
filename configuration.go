@@ -14,7 +14,7 @@ import (
 
 const (
 	DEFAULT_ENDPOINT = "https://%+v.otlp.bugsnag.com/v1/traces"
-	HUB_ENDPOINT     = "https://%+v.otlp.insighthub.smartbear.com/v1/traces"
+	HUB_ENDPOINT     = "https://%+v.otlp.bugsnag.smartbear.com/v1/traces"
 	HUB_PREFIX       = "00000"
 )
 

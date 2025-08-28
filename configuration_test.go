@@ -75,7 +75,7 @@ func TestDefaultHubValues(t *testing.T) {
 	resetEnv()
 	testConfig := Configuration{
 		APIKey:               "00000ffffeeee11112222333344445555",
-		Endpoint:             "https://00000ffffeeee11112222333344445555.otlp.insighthub.smartbear.com/v1/traces",
+		Endpoint:             "https://00000ffffeeee11112222333344445555.otlp.bugsnag.smartbear.com/v1/traces",
 		AppVersion:           "",
 		ReleaseStage:         "production",
 		EnabledReleaseStages: []string{},
