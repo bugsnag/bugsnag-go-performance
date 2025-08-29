@@ -71,11 +71,11 @@ func TestDefaultValues(t *testing.T) {
 	}
 }
 
-func TestDefaultHubValues(t *testing.T) {
+func TestDefaultSecondaryEndpointValues(t *testing.T) {
 	resetEnv()
 	testConfig := Configuration{
 		APIKey:               "00000ffffeeee11112222333344445555",
-		Endpoint:             "https://00000ffffeeee11112222333344445555.otlp.insighthub.smartbear.com/v1/traces",
+		Endpoint:             "https://00000ffffeeee11112222333344445555.otlp.bugsnag.smartbear.com/v1/traces",
 		AppVersion:           "",
 		ReleaseStage:         "production",
 		EnabledReleaseStages: []string{},
@@ -111,7 +111,7 @@ func TestConfigureOverwriteDefault(t *testing.T) {
 	}
 }
 
-func TestConfigureHubOverwriteDefault(t *testing.T) {
+func TestConfigureSecondaryEndpointOverwriteDefault(t *testing.T) {
 	resetEnv()
 	testConfig := Configuration{
 		APIKey:               "00000ffffeeee11112222333344445555",
@@ -219,10 +219,10 @@ func TestConfigureNotifierEnv(t *testing.T) {
 
 func TestEndpointFromEnvironment(t *testing.T) {
 	customEndpoint := "https://endpoint.custom.com"
-	hubAPIKey := "00000abcdef0123456789abcdef012345"
+	secondaryAPIKey := "00000abcdef0123456789abcdef012345"
 	setUp := func() {
 		os.Setenv("BUGSNAG_PERFORMANCE_ENDPOINT", customEndpoint)
-		os.Setenv("BUGSNAG_API_KEY", hubAPIKey)
+		os.Setenv("BUGSNAG_API_KEY", secondaryAPIKey)
 	}
 
 	t.Run("Should not override endpoint set by environment variable", func(st *testing.T) {
@@ -231,7 +231,7 @@ func TestEndpointFromEnvironment(t *testing.T) {
 
 		testConfig := Configuration{
 			Endpoint:     customEndpoint,
-			APIKey:       hubAPIKey,
+			APIKey:       secondaryAPIKey,
 			ReleaseStage: "production",
 		}
 
@@ -255,7 +255,7 @@ func TestEndpointFromEnvironment(t *testing.T) {
 		newCustomEndpoint := "https://test.endpoint.com"
 		testConfig := Configuration{
 			Endpoint:     newCustomEndpoint,
-			APIKey:       hubAPIKey,
+			APIKey:       secondaryAPIKey,
 			ReleaseStage: "production",
 		}
 
