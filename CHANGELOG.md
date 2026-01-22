@@ -1,6 +1,12 @@
 Changelog
 =========
 
+## 1.1.2 (2026-01-22)
+
+### Enhancements
+
+* Amend default secondary instance URL name [#35](https://github.com/bugsnag/bugsnag-go-performance/pull/35)
+
 ## 1.1.1 (2025-07-29)
 
 ### Bug fixes
