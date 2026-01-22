@@ -14,7 +14,7 @@ import (
 )
 
 // Version defines the version of this Bugsnag performance module
-const Version = "1.1.1"
+const Version = "1.1.2"
 
 // Config is the configuration for the default Bugsnag performance module
 var Config Configuration
