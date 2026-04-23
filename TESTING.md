@@ -33,6 +33,7 @@ Here is a list of compatible Go x OTeL versions:
 * For Go 1.21 - OTeL 1.17 - 1.29
 * For Go 1.22 - OTeL 1.17 - 1.29
 * For Go 1.23 - OTeL 1.17 - 1.29
+* For Go 1.25 - OTeL 1.17 - 1.43
 
 Use the Maze Runner CLI to run the tests:
 
