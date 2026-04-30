@@ -27,16 +27,12 @@ Configure the tests to be run in the following way:
 - Determine the Go version to be tested using the environment variable `GO_VERSION`, e.g. `GO_VERSION=1.19`
 - Determine the Open Telemetry SDK version using the environment variable `OTEL_VERSION`, e.g. `OTEL_VERSION=1.20`
 
-Here is a list of compatible Go x OTeL versions:
-* For Go 1.19 - OTeL 1.17 - 1.24
-* For Go 1.20 - OTeL 1.17 - 1.24
-* For Go 1.21 - OTeL 1.17 - 1.29
-* For Go 1.22 - OTeL 1.17 - 1.29
-* For Go 1.23 - OTeL 1.17 - 1.29
-* For Go 1.25 - OTeL 1.17 - 1.43
+The current module directly requires OTel v1.43.0, so local and CI runs should use:
+* Go 1.25
+* OTel 1.43.0
 
 Use the Maze Runner CLI to run the tests:
 
 ```sh
-$ GO_VERSION=1.19 OTEL_VERSION=1.20 bundle exec maze-runner
+$ GO_VERSION=1.25 OTEL_VERSION=1.43.0 bundle exec maze-runner
 ```
