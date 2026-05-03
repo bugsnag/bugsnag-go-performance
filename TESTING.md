@@ -24,8 +24,8 @@ $ bundle install
 
 Configure the tests to be run in the following way:
 
-- Determine the Go version to be tested using the environment variable `GO_VERSION`, e.g. `GO_VERSION=1.19`
-- Determine the Open Telemetry SDK version using the environment variable `OTEL_VERSION`, e.g. `OTEL_VERSION=1.20`
+- Determine the Go version to be tested using the environment variable `GO_VERSION`, e.g. `GO_VERSION=1.25`
+- Determine the Open Telemetry SDK version using the environment variable `OTEL_VERSION`, e.g. `OTEL_VERSION=1.43.0`
 
 The current module directly requires OTel v1.43.0, so local and CI runs should use:
 * Go 1.25
