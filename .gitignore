@@ -32,3 +32,6 @@ maze_output
 temp-bugsnag-performance
 
 *.gem
+.pre-commit-config.yaml
+.gitleaks.toml
+.gitleaks-baseline.json
