@@ -21,9 +21,9 @@ jobs:
     - name: Fetch decisions.yml
       run: curl https://raw.githubusercontent.com/bugsnag/license-audit/master/config/decision_files/global.yml -o decisions.yml
 
-    - uses: actions/setup-go@v2
+    - uses: actions/setup-go@v5
       with:
-        go-version: '1.16'
+        go-version: '1.25'
 
     - name: install dependencies
       run: go get -v -d ./...
