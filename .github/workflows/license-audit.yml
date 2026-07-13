@@ -25,9 +25,6 @@ jobs:
       with:
         go-version: '1.25'
 
-    - name: install dependencies
-      run: go get -v -d ./...
-
     - name: Run License Finder
       run: >
         docker run -v $PWD:/scan licensefinder/license_finder /bin/bash -lc "
