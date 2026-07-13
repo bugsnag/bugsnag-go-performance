@@ -26,8 +26,9 @@ jobs:
         go-version: '1.25'
 
     - name: Run License Finder
-      run: >
-        docker run -v $PWD:/scan licensefinder/license_finder /bin/bash -lc "
-          cd /scan &&
-          license_finder --decisions-file decisions.yml --enabled-package-managers=gomodules
-        "
+      run: |
+        docker run -v $PWD:/scan -v "$(go env GOROOT):/go" -e GOROOT=/go \
+          licensefinder/license_finder /bin/bash -lc "
+            cd /scan &&
+            license_finder --decisions-file decisions.yml --enabled-package-managers=gomodules
+          "
