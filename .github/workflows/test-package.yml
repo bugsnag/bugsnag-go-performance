@@ -1,5 +1,8 @@
 name: Test package against Go versions
 
+permissions:
+  contents: read
+
 on: [ push ]
 jobs:
   test:
