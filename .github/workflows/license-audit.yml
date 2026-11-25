@@ -35,6 +35,7 @@ jobs:
           -v "$PWD:/scan" \
           -v "$(go env GOROOT):/go:ro" \
           -e GOROOT=/go \
+          -e GOFLAGS=-buildvcs=false \
           -w /scan \
           licensefinder/license_finder /bin/bash -lc '
             export PATH="/go/bin:$PATH"
