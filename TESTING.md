@@ -27,9 +27,24 @@ Configure the tests to be run in the following way:
 - Determine the Go version to be tested using the environment variable `GO_VERSION`, e.g. `GO_VERSION=1.22`
 - Determine the OpenTelemetry SDK version using the environment variable `OTEL_VERSION`, e.g. `OTEL_VERSION=1.33.0`
 
-The minimum versions are Go 1.22.0 and OpenTelemetry 1.33.0. The CI matrix covers:
-* Go 1.22 with OTeL 1.33.0
-* Go 1.23 with OTeL 1.33.0
+The minimum versions are Go 1.22.0 and OpenTelemetry 1.33.0. The CI matrix tests
+each OpenTelemetry minor release listed in these ranges, excluding incompatible
+Go x OTeL combinations:
+
+| Go version | OpenTelemetry versions |
+| --- | --- |
+| 1.22 | 1.33.0 - 1.35.0 |
+| 1.23 | 1.33.0 - 1.38.0 |
+| 1.24 | 1.33.0 - 1.41.0 |
+| 1.25 | 1.33.0 - 1.46.0 |
+| 1.26 | 1.33.0 - 1.47.0 |
+| 1.27 | 1.33.0 - 1.47.0 |
+
+Both unit tests and E2E fixtures use the selected OpenTelemetry version.
+
+The `test-results` CI job succeeds only when every test matrix job succeeds.
+Use this stable check name for required test checks in branch rules, rather than
+individual matrix job names that change when the supported versions change.
 
 Use the Maze Runner CLI to run the tests:
 
