@@ -24,18 +24,30 @@ $ bundle install
 
 Configure the tests to be run in the following way:
 
-- Determine the Go version to be tested using the environment variable `GO_VERSION`, e.g. `GO_VERSION=1.19`
-- Determine the Open Telemetry SDK version using the environment variable `OTEL_VERSION`, e.g. `OTEL_VERSION=1.20`
+- Determine the Go version to be tested using the environment variable `GO_VERSION`, e.g. `GO_VERSION=1.22`
+- Determine the OpenTelemetry SDK version using the environment variable `OTEL_VERSION`, e.g. `OTEL_VERSION=1.33.0`
 
-Here is a list of compatible Go x OTeL versions:
-* For Go 1.19 - OTeL 1.17 - 1.24
-* For Go 1.20 - OTeL 1.17 - 1.24
-* For Go 1.21 - OTeL 1.17 - 1.29
-* For Go 1.22 - OTeL 1.17 - 1.29
-* For Go 1.23 - OTeL 1.17 - 1.29
+The minimum versions are Go 1.22.0 and OpenTelemetry 1.33.0. The CI matrix tests
+each OpenTelemetry minor release listed in these ranges, excluding incompatible
+Go x OTeL combinations:
+
+| Go version | OpenTelemetry versions |
+| --- | --- |
+| 1.22 | 1.33.0 - 1.35.0 |
+| 1.23 | 1.33.0 - 1.38.0 |
+| 1.24 | 1.33.0 - 1.41.0 |
+| 1.25 | 1.33.0 - 1.46.0 |
+| 1.26 | 1.33.0 - 1.47.0 |
+| 1.27 | 1.33.0 - 1.47.0 |
+
+Both unit tests and E2E fixtures use the selected OpenTelemetry version.
+
+The `test-results` CI job succeeds only when every test matrix job succeeds.
+Use this stable check name for required test checks in branch rules, rather than
+individual matrix job names that change when the supported versions change.
 
 Use the Maze Runner CLI to run the tests:
 
 ```sh
-$ GO_VERSION=1.19 OTEL_VERSION=1.20 bundle exec maze-runner
+$ GO_VERSION=1.22 OTEL_VERSION=1.33.0 bundle exec maze-runner
 ```
